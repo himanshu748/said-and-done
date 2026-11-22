@@ -19,3 +19,17 @@ forge deploy -e development && forge install -e development --site <site> --prod
 ```
 
 `src/core` is pure (no Forge imports): ADF reading, promise detection, date parsing, follow-up rules. `src/` holds the Forge triggers, resolver and KVS store. `static/ui` is the Custom UI (React + Vite).
+
+## Try it
+
+Development install on `one-atlas-obka.atlassian.net`: **Apps → Said & Done** in Jira and in Confluence.
+
+1. On any Jira issue, comment: *"I'll share the updated schedule with the team by Thursday."*
+2. Open **Apps → Said & Done**: the promise is there with its owner and due date.
+3. Reply on the issue: *"Shared the updated schedule."* It moves to **Kept**.
+4. In Confluence, open **Apps → Said & Done** and press **Scan last 30 days** to pick up dated action items and promises on existing pages.
+
+![Jira ledger](docs/screenshots/jira-ledger-real.png)
+![Confluence ledger](docs/screenshots/confluence-ledger-real.png)
+
+[Privacy policy](PRIVACY.md) · [Devpost draft](docs/devpost-draft.md) · [Marketplace listing draft](docs/marketplace-listing.md)
