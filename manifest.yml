@@ -1,0 +1,89 @@
+app:
+  id: ari:cloud:ecosystem::app/c5a4118b-8f7d-4258-97ef-4a52bca722ba
+  runtime:
+    name: nodejs24.x
+    memoryMB: 256
+    architecture: arm64
+
+permissions:
+  scopes:
+    - storage:app
+    - read:jira-work
+    - write:jira-work
+    - read:jira-user
+    - read:page:confluence
+    - read:comment:confluence
+    - write:comment:confluence
+    - read:space:confluence
+    - read:confluence-user
+    - read:confluence-content.summary
+  content:
+    styles:
+      - unsafe-inline
+
+modules:
+  jira:globalPage:
+    - key: jira-ledger
+      title: Said & Done
+      icon: resource:ui;icon.svg
+      resource: ui
+      resolver:
+        function: ui-resolver
+  jira:issuePanel:
+    - key: jira-issue-promises
+      title: Promises
+      icon: resource:ui;icon.svg
+      resource: ui
+      resolver:
+        function: ui-resolver
+  confluence:globalPage:
+    - key: confluence-ledger
+      title: Said & Done
+      icon: resource:ui;icon.svg
+      route: said-and-done
+      resource: ui
+      resolver:
+        function: ui-resolver
+  confluence:contentBylineItem:
+    - key: confluence-page-promises
+      title: Promises
+      tooltip: Promises made on this page
+      icon: resource:ui;icon.svg
+      viewportSize: large
+      resource: ui
+      resolver:
+        function: ui-resolver
+  trigger:
+    - key: jira-comment-trigger
+      function: on-jira-comment
+      events:
+        - avi:jira:commented:issue
+    - key: confluence-page-trigger
+      function: on-page
+      events:
+        - avi:confluence:created:page
+        - avi:confluence:updated:page
+    - key: confluence-comment-trigger
+      function: on-page-comment
+      events:
+        - avi:confluence:created:comment
+  scheduledTrigger:
+    - key: reminders-hourly
+      function: reminders
+      interval: hour
+  function:
+    - key: ui-resolver
+      handler: index.handler
+    - key: on-jira-comment
+      handler: index.onJiraComment
+    - key: on-page
+      handler: index.onConfluencePage
+    - key: on-page-comment
+      handler: index.onConfluenceComment
+    - key: reminders
+      handler: index.sendReminders
+      timeoutSeconds: 120
+
+resources:
+  - key: ui
+    path: static/ui/dist
