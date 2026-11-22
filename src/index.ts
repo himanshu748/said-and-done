@@ -34,15 +34,19 @@ export async function onConfluenceComment(event: ConfluenceEvent): Promise<void>
 /** Hourly: post the reminders that are owed. */
 export async function sendReminders(): Promise<void> {
   const now = Date.now();
-  for (const f of await listFollowUps()) {
+  const all = await listFollowUps();
+  let sent = 0;
+  for (const f of all) {
     const kind = nudgeDue(f, now);
     if (!kind) continue;
     try {
       if (f.source.product === 'jira') await addJiraComment(f.source.containerId, reminderDoc(f, kind));
       else await addPageComment(f.source.containerId, reminderDoc(f, kind));
       await saveFollowUp(withEvent(f, { nudges: [...f.nudges, kind] }, kind === 'overdue' ? 'Overdue reminder posted' : 'Reminder posted', now));
+      sent++;
     } catch (e) {
       console.error(`reminder ${f.id} failed`, e);
     }
   }
+  console.log(`reminders: ${all.length} follow-ups checked, ${sent} posted`);
 }
