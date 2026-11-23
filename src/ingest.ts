@@ -43,7 +43,7 @@ export async function ingest(args: { source: Source; doc: unknown; authorId: str
     const written = args.writtenAt.getTime();
     if (signal && !all.some((f) => f.settledBy === source.itemId)) {
       const open = all.filter(
-        (f) => f.owner.accountId === author.accountId && f.source.itemId !== source.itemId && (f.status === 'open' || (f.status === 'slipping' && signal === 'done')) && (f.writtenAt !== undefined ? f.writtenAt < written : f.createdAt < now),
+        (f) => !f.dismissed && f.owner.accountId === author.accountId && f.source.itemId !== source.itemId && (f.status === 'open' || (f.status === 'slipping' && signal === 'done')) && (f.writtenAt !== undefined ? f.writtenAt < written : f.createdAt < now),
       );
       const hit = pickPromise(open, text);
       if (hit) {
@@ -61,6 +61,7 @@ export async function ingest(args: { source: Source; doc: unknown; authorId: str
     next.writtenAt = args.writtenAt.getTime();
     if (args.backfill && next.due && next.due.at < now) next.nudges = ['before', 'overdue'];
     const prev = await getFollowUp(next.id);
+    if (prev?.dismissed) continue;
     // "I will…" belongs to whoever wrote it first, not to a later editor of the page.
     if (prev && c.owner.kind === 'author') next.owner = prev.author;
     const base = prev?.removed ? withEvent(prev, { status: 'open', removed: false }, 'Reopened — back on the page', now) : prev;
@@ -75,7 +76,7 @@ export async function ingest(args: { source: Source; doc: unknown; authorId: str
     for (const c of detectPromises(ticked, writtenOn)) {
       seen.add(c.fingerprint);
       const existing = (await listForContainer(source.containerId)).find((f) => f.fingerprint === c.fingerprint && f.source.itemId === source.itemId);
-      if (existing && (existing.status === 'open' || existing.status === 'slipping')) {
+      if (existing && !existing.dismissed && (existing.status === 'open' || existing.status === 'slipping')) {
         await saveFollowUp(withEvent(existing, { status: 'kept' }, `Kept — action item ticked by ${author.name}`, now));
         result.settled++;
       }
@@ -84,7 +85,7 @@ export async function ingest(args: { source: Source; doc: unknown; authorId: str
   // A promise edited out of the page is no longer one.
   if (source.kind === 'page') {
     for (const f of await listForContainer(source.containerId)) {
-      if (f.source.itemId === source.itemId && (f.status === 'open' || f.status === 'slipping') && !seen.has(f.fingerprint) && (f.writtenAt ?? 0) <= args.writtenAt.getTime()) {
+      if (f.source.itemId === source.itemId && !f.dismissed && (f.status === 'open' || f.status === 'slipping') && !seen.has(f.fingerprint) && (f.writtenAt ?? 0) <= args.writtenAt.getTime()) {
         await saveFollowUp(withEvent(f, { status: 'dropped', removed: true }, `Dropped — removed from the page by ${author.name}`, now));
       }
     }

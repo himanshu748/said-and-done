@@ -45,6 +45,8 @@ export interface FollowUp {
   removed?: boolean;
   /** Deadline set or cleared in the app; rescans of the same text keep it. */
   dueByHand?: boolean;
+  /** Marked “not a promise”; hidden and never re-detected from the same text. */
+  dismissed?: boolean;
   history: { at: number; what: string }[];
 }
 
@@ -102,7 +104,7 @@ export function timing(f: Pick<FollowUp, 'due'>, now: number): Timing {
 
 /** Which reminder is owed now, if any: one a day before the deadline, one after it passes. */
 export function nudgeDue(f: FollowUp, now: number): Nudge | null {
-  if ((f.status !== 'open' && f.status !== 'slipping') || !f.due) return null;
+  if ((f.status !== 'open' && f.status !== 'slipping') || !f.due || f.dismissed) return null;
   const left = f.due.at - now;
   if (left < 0) return f.nudges.includes('overdue') || -left > 7 * DAY ? null : 'overdue';
   if (left < DAY && !f.nudges.includes('before') && now - f.createdAt > 60 * 60_000) return 'before';
@@ -119,7 +121,8 @@ export interface Stats {
   keptOnTime: number | null;
 }
 
-export function stats(all: FollowUp[], now: number): Stats {
+export function stats(items: FollowUp[], now: number): Stats {
+  const all = items.filter((f) => !f.dismissed);
   const live = all.filter((f) => f.status === 'open' || f.status === 'slipping');
   const kept = all.filter((f) => f.status === 'kept');
   const closedDated = all.filter((f) => (f.status === 'kept' || f.status === 'dropped') && f.due);

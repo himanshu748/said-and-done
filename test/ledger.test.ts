@@ -65,4 +65,12 @@ describe('ledger', () => {
     expect(s).toEqual({ open: 2, overdue: 0, dueThisWeek: 1, kept: 1, dropped: 0, keptOnTime: 100 });
     expect(sortForLedger([b, c, a]).map((f) => f.action)).toEqual(['send the redlines', 'share the slides when ready', 'book the room']);
   });
+
+  it('leaves dismissed text out of reminders and counts', () => {
+    const f = make("I'll send the redlines by Friday");
+    const gone = { ...f, dismissed: true };
+    expect(nudgeDue(f, Date.UTC(2026, 10, 27, 8))).toBe('before');
+    expect(nudgeDue(gone, Date.UTC(2026, 10, 27, 8))).toBeNull();
+    expect(stats([f, gone], created).open).toBe(1);
+  });
 });

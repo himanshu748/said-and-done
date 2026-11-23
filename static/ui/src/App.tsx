@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { timing, type FollowUp, type Stats, type Status, type Timing } from '@core/ledger';
 import { formatDay } from '@core/reminder';
-import { getContext, loadLedger, open, scan, setDue, setStatus, type Ledger } from './bridge';
+import { dismiss, getContext, loadLedger, open, scan, setDue, setStatus, type Ledger } from './bridge';
 
-type Filter = 'live' | 'overdue' | 'kept' | 'dropped' | 'all';
+type Filter = 'live' | 'mine' | 'overdue' | 'kept' | 'dropped' | 'all';
 
 const GROUPS: { key: Timing; label: string }[] = [
   { key: 'overdue', label: 'Overdue' },
@@ -14,6 +14,7 @@ const GROUPS: { key: Timing; label: string }[] = [
 ];
 
 const live = (f: FollowUp) => f.status === 'open' || f.status === 'slipping';
+const counted = (items: FollowUp[]) => items.filter((f) => !f.dismissed);
 
 export function App() {
   const [mode, setMode] = useState<'ledger' | 'panel' | null>(null);
@@ -81,20 +82,22 @@ function LedgerView({ data, onChange, onScan, scanning, error }: { data: Ledger;
     const q = query.trim().toLowerCase();
     return data.items.filter((f) => {
       if (filter === 'live' && !live(f)) return false;
+      if (filter === 'mine' && !(live(f) && f.owner.accountId === data.viewer)) return false;
       if (filter === 'overdue' && !(live(f) && timing(f, now) === 'overdue')) return false;
       if (filter === 'kept' && f.status !== 'kept') return false;
       if (filter === 'dropped' && f.status !== 'dropped') return false;
       if (!q) return true;
       return [f.action, f.quote, f.owner.name, f.source.containerKey, f.source.title].some((x) => x.toLowerCase().includes(q));
     });
-  }, [data.items, filter, query, now]);
+  }, [data.items, data.viewer, filter, query, now]);
 
   const tabs: { key: Filter; label: string; n: number }[] = [
     { key: 'live', label: 'Open', n: s.open },
+    ...(data.viewer ? [{ key: 'mine' as const, label: 'Mine', n: counted(data.items).filter((f) => live(f) && f.owner.accountId === data.viewer).length }] : []),
     { key: 'overdue', label: 'Overdue', n: s.overdue },
     { key: 'kept', label: 'Kept', n: s.kept },
     { key: 'dropped', label: 'Dropped', n: s.dropped },
-    { key: 'all', label: 'All', n: data.items.length },
+    { key: 'all', label: 'All', n: counted(data.items).length },
   ];
 
   return (
@@ -146,7 +149,7 @@ function LedgerView({ data, onChange, onScan, scanning, error }: { data: Ledger;
               <input type="search" placeholder="Search people, issues, words" value={query} onChange={(e) => setQuery(e.target.value)} />
             </label>
           </div>
-          <Timeline items={shown} now={now} onChange={onChange} grouped={filter === 'live' || filter === 'overdue'} />
+          <Timeline items={shown} now={now} onChange={onChange} grouped={filter === 'live' || filter === 'mine' || filter === 'overdue'} />
         </>
       )}
       <footer className="foot">Detection runs inside your Atlassian site. No text leaves it.</footer>
@@ -154,19 +157,21 @@ function LedgerView({ data, onChange, onScan, scanning, error }: { data: Ledger;
   );
 }
 
-function recount(items: FollowUp[], now: number, server: Stats): Stats {
+function recount(all: FollowUp[], now: number, server: Stats): Stats {
+  const items = counted(all);
   const l = items.filter(live);
   return { ...server, open: l.length, overdue: l.filter((f) => timing(f, now) === 'overdue').length, kept: items.filter((f) => f.status === 'kept').length, dropped: items.filter((f) => f.status === 'dropped').length };
 }
 
 function PanelView({ data, onChange }: { data: Ledger; onChange: (f: FollowUp) => void }) {
-  const open = data.items.filter(live).length;
+  const items = counted(data.items);
+  const open = items.filter(live).length;
   const where = data.product === 'jira' ? 'issue' : 'page';
   return (
     <div className="shell shell--panel">
       <p className="panel__head">
         <strong>{open}</strong> open {open === 1 ? 'promise' : 'promises'} on this {where}
-        {data.items.length > open && <span className="panel__sub"> · {data.items.length - open} settled</span>}
+        {items.length > open && <span className="panel__sub"> · {items.length - open} settled</span>}
       </p>
       {data.items.length === 0 ? (
         <p className="panel__empty">
@@ -207,7 +212,7 @@ const STATUS_TEXT: Record<Status, string> = { open: 'Open', slipping: 'Slipping'
 
 function relative(due: number, now: number): string {
   const d = Math.round((due - now) / 86_400_000);
-  if (due < now) return d === 0 ? 'due today' : `${-d}d late`;
+  if (due < now) return `${Math.max(1, Math.ceil((now - due) / 86_400_000))}d late`;
   if (d === 0) return 'due today';
   if (d === 1) return 'tomorrow';
   return `in ${d} days`;
@@ -231,6 +236,19 @@ function Card({ f, now, i, onChange, compact }: { f: FollowUp; now: number; i: n
       setBusy(false);
     }
   };
+
+  if (f.dismissed)
+    return (
+      <li className="card card--dismissed" style={{ '--i': Math.min(i, 12) } as CSSProperties}>
+        <p className="card__gone">
+          Hidden as not a promise: <q>{f.quote}</q>
+        </p>
+        <button type="button" className="btn btn--ghost" disabled={busy} onClick={() => act(() => dismiss(f.id, false))}>
+          Undo
+        </button>
+        {err && <p className="notice notice--error" role="alert">{err}</p>}
+      </li>
+    );
 
   return (
     <li className={`card card--${t} card--${f.status}${compact ? ' card--compact' : ''}`} style={{ '--i': Math.min(i, 12) } as CSSProperties}>
@@ -285,6 +303,9 @@ function Card({ f, now, i, onChange, compact }: { f: FollowUp; now: number; i: n
               )}
               <button type="button" className="btn btn--ghost" disabled={busy} onClick={() => act(() => setStatus(f.id, 'dropped'))}>
                 Drop
+              </button>
+              <button type="button" className="btn btn--link" disabled={busy} title="Hide it and never pick this text up again" onClick={() => act(() => dismiss(f.id, true))}>
+                Not a promise
               </button>
             </>
           ) : (

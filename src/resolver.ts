@@ -40,7 +40,7 @@ resolver.define('list', async ({ context }) => {
   const product = productOf(ctx);
   const container = containerOf(ctx);
   // Panels sit on an issue or page the viewer already has open.
-  const items = container ? await listForContainer(container) : await visible(product, await listFollowUps());
+  const items = (container ? await listForContainer(container) : await visible(product, await listFollowUps())).filter((f) => !f.dismissed);
   const now = Date.now();
   return { product, now, viewer: ctx.accountId ?? null, scoped: Boolean(container), items: sortForLedger(items), stats: stats(items, now) };
 });
@@ -64,6 +64,16 @@ resolver.define('setDue', async ({ payload, context }) => {
   const tz = ctx.accountId ? (await getUser(productOf(ctx), ctx.accountId)).timeZone : 'UTC';
   const due = day ? { day, phrase: f.due?.phrase ?? 'set by hand', precision: 'day' as const, at: endOfDayInZone(day, tz) } : null;
   const next = withEvent(f, { due, dueByHand: true, nudges: [] }, day ? `Due date set to ${day}` : 'Due date cleared', Date.now());
+  await saveFollowUp(next);
+  return next;
+});
+
+resolver.define('dismiss', async ({ payload, context }) => {
+  const { id, dismissed } = payload as { id: string; dismissed: boolean };
+  const ctx = context as Ctx;
+  const f = await editable(ctx, id);
+  const who = ctx.accountId ? (await getUser(productOf(ctx), ctx.accountId)).name : 'someone';
+  const next = withEvent(f, { dismissed: Boolean(dismissed) }, dismissed ? `Marked not a promise by ${who}` : `Restored by ${who}`, Date.now());
   await saveFollowUp(next);
   return next;
 });
