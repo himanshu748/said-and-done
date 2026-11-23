@@ -62,7 +62,7 @@ export async function ingest(args: { source: Source; doc: unknown; authorId: str
     if (args.backfill && next.due && next.due.at < now) next.nudges = ['before', 'overdue'];
     const prev = await getFollowUp(next.id);
     // "I will…" belongs to whoever wrote it first, not to a later editor of the page.
-    if (prev && c.owner.kind === 'author' && prev.owner.accountId === prev.author.accountId) next.owner = prev.owner;
+    if (prev && c.owner.kind === 'author') next.owner = prev.author;
     const base = prev?.removed ? withEvent(prev, { status: 'open', removed: false }, 'Reopened — back on the page', now) : prev;
     const save = base ? refresh(base, next, now) : next;
     if (save !== prev) await saveFollowUp(save);
