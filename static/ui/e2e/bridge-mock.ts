@@ -56,7 +56,7 @@ window.__sdCalls = [];
 window.__sdNav = [];
 
 function stats() {
-  const live = items.filter((f) => f.status === 'open' || f.status === 'slipping');
+  const live = items.filter((f) => !f.dismissed).filter((f) => f.status === 'open' || f.status === 'slipping');
   return { open: live.length, overdue: live.filter((f) => f.due && f.due.at < NOW).length, dueThisWeek: live.filter((f) => f.due && f.due.at >= NOW && f.due.at - NOW < 7 * 86_400_000).length, kept: items.filter((f) => f.status === 'kept').length, dropped: 0, keptOnTime: 100 };
 }
 
@@ -71,6 +71,13 @@ export async function invoke(name: string, payload?: Record<string, unknown>): P
       name === 'setStatus'
         ? { ...f, status: payload?.['status'] as FollowUp['status'], history: [...f.history, { at: NOW, what: `${String(payload?.['status'])} by Legal lead` }] }
         : { ...f, due: { day: String(payload?.['day']), phrase: 'set by hand', precision: 'day', at: Date.parse(`${String(payload?.['day'])}T23:59:59Z`) } };
+    items = items.map((x) => (x.id === f.id ? next : x));
+    return next;
+  }
+  if (name === 'dismiss') {
+    const f = items.find((x) => x.id === payload?.['id']);
+    if (!f) throw new Error('missing');
+    const next: FollowUp = { ...f, dismissed: Boolean(payload?.['dismissed']) };
     items = items.map((x) => (x.id === f.id ? next : x));
     return next;
   }

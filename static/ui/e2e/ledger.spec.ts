@@ -36,6 +36,28 @@ test('empty ledger scans the last 30 days', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'send the onboarding pack' })).toBeVisible();
 });
 
+test('mine shows only the viewer\'s promises', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('tab', { name: /Mine/ }).click();
+  await expect(page.getByRole('heading', { name: 'send the redlined MSA' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'share the final banner set' })).toHaveCount(0);
+});
+
+test('not a promise hides a card with undo', async ({ page }) => {
+  await page.goto('/');
+  const open = page.getByRole('tab', { name: /^Open/ });
+  await expect(open).toContainText('4');
+  const card = page.getByRole('listitem').filter({ hasText: 'update the checklist' });
+  await card.getByRole('button', { name: 'Not a promise' }).click();
+  await expect(card).toContainText('Hidden as not a promise');
+  await expect(open).toContainText('3');
+  await page.getByRole('button', { name: 'Scan last 30 days' }).click();
+  await expect(page.getByRole('status')).toContainText('found 1 new promise');
+  await card.getByRole('button', { name: 'Undo' }).click();
+  await expect(card.getByRole('heading', { name: 'update the checklist' })).toBeVisible();
+  await expect(open).toContainText('5');
+});
+
 test('issue panel is compact and scoped', async ({ page }) => {
   await page.goto('/?module=jira-issue-promises');
   await expect(page.getByText(/open promises on this issue/)).toBeVisible();

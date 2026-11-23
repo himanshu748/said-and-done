@@ -14,7 +14,7 @@ Most work promises are made in passing: a comment on an issue, a line in meeting
 
 - **Finds promises where they are written.** Jira comments, Confluence pages, page comments and action items. "I'll", "I will", "let me", "we'll", "@Ana will…", "@Ana to…", and Confluence action items with a date. Questions, reported speech ("you said you'd…"), conditionals and code blocks are ignored.
 - **Works out the owner and date.** The owner is the writer or the person @mentioned. Dates cover 25+ phrasings — "Friday", "next Tuesday", "EOD", "end of next week", "Dec 12", "the 15th", "in 3 business days", "end of Q1", Confluence date chips — resolved in the writer's own time zone.
-- **Settles them from what people already do.** The owner replying "Sent, here it is" marks it **kept**; "running a day late" marks it **slipping**; ticking the action item marks it kept. Buttons cover the rest.
+- **Settles them from what people already do.** The owner replying "Sent, here it is" marks it **kept**; "running a day late" marks it **slipping**; ticking the action item marks it kept. Buttons cover the rest, and **Not a promise** hides a false match for good. **Mine** filters to what you owe.
 - **Reminds in the same thread.** One comment mentioning the owner the day before the deadline, one after it passes, then it stops.
 - **Shows the ledger.** A Jira and a Confluence page with open, due-this-week, overdue and kept-on-time counts, grouped by deadline, searchable; an issue panel and a page byline item show the promises made right there. "Scan last 30 days" picks up what was written before install, only from content the viewer can see.
 

@@ -68,6 +68,16 @@ resolver.define('setDue', async ({ payload, context }) => {
   return next;
 });
 
+resolver.define('dismiss', async ({ payload, context }) => {
+  const { id, dismissed } = payload as { id: string; dismissed: boolean };
+  const ctx = context as Ctx;
+  const f = await editable(ctx, id);
+  const who = ctx.accountId ? (await getUser(productOf(ctx), ctx.accountId)).name : 'someone';
+  const next = withEvent(f, { dismissed: Boolean(dismissed) }, dismissed ? `Marked not a promise by ${who}` : `Restored by ${who}`, Date.now());
+  await saveFollowUp(next);
+  return next;
+});
+
 /** Reads recent comments and pages the viewer can see and records the promises in them. */
 resolver.define('scan', async ({ context }) => {
   const ctx = context as Ctx;

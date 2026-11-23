@@ -4,6 +4,7 @@ A Forge app for Jira and Confluence that turns promises people write — *"I'll 
 
 - **Detects** commitments in Jira comments, Confluence pages, page comments and action items. Owner: the writer, or the person @mentioned. Due date: 25+ phrasings (Friday, next week, EOD, Dec 12, the 15th, in 3 business days, end of Q1…), resolved in the writer's time zone.
 - **Settles** them from replies: the owner writing "sent, here it is" marks it kept; "running late" marks it slipping; ticking the action item on the page marks it kept.
+- **Learns from mistakes**: "Not a promise" hides a false match, with undo, and that text is never picked up again. **Mine** shows only what you owe.
 - **Reminds** once a day before the deadline and once after it passes, as a comment mentioning the owner.
 - **Ledger** page in Jira and Confluence with open/overdue/kept counts, plus an issue panel and a page byline item.
 

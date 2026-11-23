@@ -46,7 +46,8 @@ export async function ingest(args: { source: Source; doc: unknown; authorId: str
         (f) => f.owner.accountId === author.accountId && f.source.itemId !== source.itemId && (f.status === 'open' || (f.status === 'slipping' && signal === 'done')) && (f.writtenAt !== undefined ? f.writtenAt < written : f.createdAt < now),
       );
       const hit = pickPromise(open, text);
-      if (hit) {
+      // A reply about text marked not a promise settles nothing else.
+      if (hit && !hit.dismissed) {
         await saveFollowUp(withEvent(hit, { status: signal === 'done' ? 'kept' : 'slipping', settledBy: source.itemId }, signal === 'done' ? `Kept — ${author.name} replied` : `Slipping — ${author.name} asked for more time`, now));
         result.settled++;
       }
@@ -61,12 +62,15 @@ export async function ingest(args: { source: Source; doc: unknown; authorId: str
     next.writtenAt = args.writtenAt.getTime();
     if (args.backfill && next.due && next.due.at < now) next.nudges = ['before', 'overdue'];
     const prev = await getFollowUp(next.id);
+    // Same commitment stays hidden; an action item rewritten in place is a new one.
+    if (prev?.dismissed && prev.action === next.action) continue;
     // "I will…" belongs to whoever wrote it first, not to a later editor of the page.
-    if (prev && c.owner.kind === 'author') next.owner = prev.author;
-    const base = prev?.removed ? withEvent(prev, { status: 'open', removed: false }, 'Reopened — back on the page', now) : prev;
-    const save = base ? refresh(base, next, now) : next;
+    if (prev && !prev.dismissed && c.owner.kind === 'author') next.owner = prev.author;
+    const base = prev?.dismissed ? undefined : prev?.removed ? withEvent(prev, { status: 'open', removed: false }, 'Reopened — back on the page', now) : prev;
+    // A reply that already settled the old text must not be reread against another promise.
+    const save = base ? refresh(base, next, now) : prev?.settledBy ? { ...next, settledBy: prev.settledBy } : next;
     if (save !== prev) await saveFollowUp(save);
-    if (!prev) result.found++;
+    if (!prev || prev.dismissed) result.found++;
   }
 
   // Ticked action items on a page settle their promise.
@@ -75,7 +79,7 @@ export async function ingest(args: { source: Source; doc: unknown; authorId: str
     for (const c of detectPromises(ticked, writtenOn)) {
       seen.add(c.fingerprint);
       const existing = (await listForContainer(source.containerId)).find((f) => f.fingerprint === c.fingerprint && f.source.itemId === source.itemId);
-      if (existing && (existing.status === 'open' || existing.status === 'slipping')) {
+      if (existing && !existing.dismissed && (existing.status === 'open' || existing.status === 'slipping')) {
         await saveFollowUp(withEvent(existing, { status: 'kept' }, `Kept — action item ticked by ${author.name}`, now));
         result.settled++;
       }
@@ -84,7 +88,7 @@ export async function ingest(args: { source: Source; doc: unknown; authorId: str
   // A promise edited out of the page is no longer one.
   if (source.kind === 'page') {
     for (const f of await listForContainer(source.containerId)) {
-      if (f.source.itemId === source.itemId && (f.status === 'open' || f.status === 'slipping') && !seen.has(f.fingerprint) && (f.writtenAt ?? 0) <= args.writtenAt.getTime()) {
+      if (f.source.itemId === source.itemId && !f.dismissed && (f.status === 'open' || f.status === 'slipping') && !seen.has(f.fingerprint) && (f.writtenAt ?? 0) <= args.writtenAt.getTime()) {
         await saveFollowUp(withEvent(f, { status: 'dropped', removed: true }, `Dropped — removed from the page by ${author.name}`, now));
       }
     }
