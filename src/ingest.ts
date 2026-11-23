@@ -62,13 +62,18 @@ export async function ingest(args: { source: Source; doc: unknown; authorId: str
     next.writtenAt = args.writtenAt.getTime();
     if (args.backfill && next.due && next.due.at < now) next.nudges = ['before', 'overdue'];
     const prev = await getFollowUp(next.id);
-    if (prev?.dismissed) continue;
+    // Same commitment stays hidden; an action item rewritten in place is a new one.
+    if (prev?.dismissed && prev.action === next.action) continue;
     // "I will…" belongs to whoever wrote it first, not to a later editor of the page.
     if (prev && c.owner.kind === 'author') next.owner = prev.author;
-    const base = prev?.removed ? withEvent(prev, { status: 'open', removed: false }, 'Reopened — back on the page', now) : prev;
+    const base = prev?.dismissed
+      ? withEvent(prev, { status: 'open', dismissed: false, removed: false }, 'Rewritten as a new promise', now)
+      : prev?.removed
+        ? withEvent(prev, { status: 'open', removed: false }, 'Reopened — back on the page', now)
+        : prev;
     const save = base ? refresh(base, next, now) : next;
     if (save !== prev) await saveFollowUp(save);
-    if (!prev) result.found++;
+    if (!prev || prev.dismissed) result.found++;
   }
 
   // Ticked action items on a page settle their promise.

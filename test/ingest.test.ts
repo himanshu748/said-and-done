@@ -30,8 +30,26 @@ describe('ingest', () => {
     expect((await ingest({ ...args, doc: doc("I'll send the redlines by Monday"), now: at + 1000 })).found).toBe(0);
     expect(db.get(f.id)).toEqual({ ...f, dismissed: true });
 
+    await ingest({ source: source('3'), doc: doc("I'll book the review room by Monday"), authorId: 'acc', writtenAt: new Date(at + 2000), now: at + 2000 });
     const reply = await ingest({ source: source('2'), doc: doc('Sent the redlines.'), authorId: 'acc', writtenAt: new Date(at + 5000), now: at + 5000 });
     expect(reply.settled).toBe(0);
-    expect(db.get(f.id)?.status).toBe('open');
+    expect([...db.values()].map((x) => x.status)).toEqual(['open', 'open']);
+  });
+
+  it('brings back a dismissed action item rewritten as a new commitment', async () => {
+    const task = (text: string) => ({ type: 'doc', version: 1, content: [{ type: 'taskList', attrs: { localId: 'l1' }, content: [{ type: 'taskItem', attrs: { localId: 't1', state: 'TODO' }, content: [{ type: 'text', text }] }] }] });
+    const page: Source = { ...source('p1'), product: 'confluence', kind: 'page', containerId: 'p1' };
+    const args = { source: page, doc: task('@Sam to tidy the old notes by Friday'), authorId: 'acc', writtenAt: new Date(at), now: at };
+    await ingest(args);
+    const [f] = [...db.values()];
+    if (!f) throw new Error('not saved');
+    db.set(f.id, { ...f, dismissed: true });
+
+    await ingest({ ...args, doc: task('@Sam to tidy the old notes by Monday'), writtenAt: new Date(at + 1000), now: at + 1000 });
+    expect(db.get(f.id)?.dismissed).toBe(true);
+
+    const back = await ingest({ ...args, doc: task('Sam to send the signed contract to Legal by Friday'), writtenAt: new Date(at + 2000), now: at + 2000 });
+    expect(back.found).toBe(1);
+    expect(db.get(f.id)).toMatchObject({ dismissed: false, status: 'open', action: expect.stringContaining('signed contract') });
   });
 });
