@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
-import { timing, type FollowUp, type Stats, type Status, type Timing } from '@core/ledger';
+import { stats, timing, type FollowUp, type Status, type Timing } from '@core/ledger';
 import { formatDay } from '@core/reminder';
 import { dismiss, getContext, loadLedger, open, scan, setDue, setStatus, type Ledger } from './bridge';
 
@@ -81,7 +81,7 @@ function LedgerView({ data, onChange, onScan, scanning, error }: { data: Ledger;
   const [filter, setFilter] = useState<Filter>('live');
   const [query, setQuery] = useState('');
   const now = data.now;
-  const s = useMemo(() => recount(data.items, now, data.stats), [data, now]);
+  const s = useMemo(() => stats(data.items, now), [data, now]);
   const where = data.product === 'jira' ? 'Jira comments' : 'Confluence pages and comments';
 
   const shown = useMemo(() => {
@@ -161,12 +161,6 @@ function LedgerView({ data, onChange, onScan, scanning, error }: { data: Ledger;
       <footer className="foot">Detection runs inside your Atlassian site. No text leaves it.</footer>
     </div>
   );
-}
-
-function recount(all: FollowUp[], now: number, server: Stats): Stats {
-  const items = counted(all);
-  const l = items.filter(live);
-  return { ...server, open: l.length, overdue: l.filter((f) => timing(f, now) === 'overdue').length, kept: items.filter((f) => f.status === 'kept').length, dropped: items.filter((f) => f.status === 'dropped').length };
 }
 
 function PanelView({ data, onChange }: { data: Ledger; onChange: (f: FollowUp) => void }) {
