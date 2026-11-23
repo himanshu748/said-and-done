@@ -48,8 +48,9 @@ describe('ingest', () => {
     await ingest({ ...args, doc: task('@Sam to tidy the old notes by Monday'), writtenAt: new Date(at + 1000), now: at + 1000 });
     expect(db.get(f.id)?.dismissed).toBe(true);
 
-    const back = await ingest({ ...args, doc: task('Sam to send the signed contract to Legal by Friday'), writtenAt: new Date(at + 2000), now: at + 2000 });
+    const back = await ingest({ ...args, doc: task('I will send the signed contract to Legal by Friday'), authorId: 'kim', writtenAt: new Date(at + 2000), now: at + 2000 });
     expect(back.found).toBe(1);
-    expect(db.get(f.id)).toMatchObject({ dismissed: false, status: 'open', action: expect.stringContaining('signed contract') });
+    expect(db.get(f.id)).toMatchObject({ status: 'open', writtenAt: at + 2000, owner: { accountId: 'kim' }, action: expect.stringContaining('signed contract') });
+    expect(db.get(f.id)?.dismissed).toBeUndefined();
   });
 });
