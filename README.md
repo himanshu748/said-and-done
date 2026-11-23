@@ -19,6 +19,8 @@ npm run build:ui && npm run test:e2e             # UI tests (Playwright, mocked 
 forge deploy -e development && forge install -e development --site <site> --product jira   # and --product confluence
 ```
 
+Judges install the unlisted **Said & Done (judge build)** copy, because an app submitted to the Marketplace [can't be shared by installation link](https://developer.atlassian.com/platform/forge/distribute-your-apps/). Deploy it from the same code with `JUDGE_APP_ID=700d5de2-08d6-447f-8640-89ba451c16af scripts/judge-build.sh`.
+
 `src/core` is pure (no Forge imports): ADF reading, promise detection, date parsing, follow-up rules. `src/` holds the Forge triggers, resolver and KVS store. `static/ui` is the Custom UI (React + Vite).
 
 ## Try it
