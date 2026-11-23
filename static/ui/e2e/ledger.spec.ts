@@ -58,6 +58,14 @@ test('not a promise hides a card with undo', async ({ page }) => {
   await expect(open).toContainText('5');
 });
 
+test('hiding a promise due this week updates the count', async ({ page }) => {
+  await page.goto('/');
+  const week = page.locator('.stat').filter({ hasText: 'Due this week' });
+  await expect(week).toContainText('2');
+  await page.getByRole('listitem').filter({ hasText: 'book the review session' }).getByRole('button', { name: 'Not a promise' }).click();
+  await expect(week).toContainText('1');
+});
+
 test('issue panel is compact and scoped', async ({ page }) => {
   await page.goto('/?module=jira-issue-promises');
   await expect(page.getByText(/open promises on this issue/)).toBeVisible();
