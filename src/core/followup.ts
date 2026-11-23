@@ -9,7 +9,10 @@ const SLIPPING = /\b(running (?:a bit )?late|need (?:a bit |a little |some )?mor
 
 export function readSignal(text: string): Signal | null {
   const parts = text.split(/(?<=[.!?])\s+/).filter((p) => p.trim() && !/\?\s*$/.test(p));
-  if (parts.length > 1) return parts.map(readSignal).find((s) => s) ?? null;
+  if (parts.length > 1) {
+    const signals = parts.map(readSignal);
+    return signals.includes('slipping') ? 'slipping' : (signals.find((s) => s) ?? null);
+  }
   if (!parts.length) return null;
   text = parts[0] ?? '';
   const s = SLIPPING.exec(text);

@@ -46,6 +46,12 @@ describe('ledger', () => {
     expect(refresh(f, make("I'll send the redlines by Friday", created + 3 * 86_400_000), created + 1)).toBe(f);
     const handSet = { ...f, due: f.due && { ...f.due, day: '2026-12-01' } };
     expect(refresh(handSet, make("I'll send the redlines by Friday"), created + 1)).toBe(handSet);
+    const cleared = { ...f, due: null, dueByHand: true };
+    expect(refresh(cleared, make("I'll send the redlines by Friday"), created + 1)).toBe(cleared);
+    const edited = make("I'll send the redlines by Friday");
+    const reassigned = refresh(f, { ...edited, owner: { ...edited.owner, accountId: 'acc-9', name: 'Kai' } }, created + 1);
+    expect(reassigned.owner.accountId).toBe('acc-9');
+    expect(reassigned.due).toEqual(f.due);
     const moved = refresh(f, make("I'll send the redlines by Dec 4"), created + 1);
     expect(moved).toMatchObject({ status: 'slipping', nudges: [], due: { day: '2026-12-04' } });
     expect(moved.history.at(-1)?.what).toBe('Due date changed to 2026-12-04');

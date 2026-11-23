@@ -2,6 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { overlap, pickPromise, readSignal } from '../src/core/followup';
 
 describe('readSignal', () => {
+  it('lets a delay outweigh partial progress', () => {
+    expect(readSignal('Sent a draft. Need more time for the final contract.')).toBe('slipping');
+  });
   it('reads the statement before a trailing question', () => {
     expect(readSignal('Sent the contract. Can you confirm receipt?')).toBe('done');
   });

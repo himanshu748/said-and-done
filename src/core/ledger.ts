@@ -43,6 +43,8 @@ export interface FollowUp {
   settledBy?: string;
   /** Dropped because its text left the page; restoring the text reopens it. */
   removed?: boolean;
+  /** Deadline set or cleared in the app; rescans of the same text keep it. */
+  dueByHand?: boolean;
   history: { at: number; what: string }[];
 }
 
@@ -78,9 +80,13 @@ export function withEvent(f: FollowUp, patch: Partial<FollowUp>, what: string, n
 /** Re-detected text keeps the record and its status; only wording and date move. */
 export function refresh(prev: FollowUp, next: FollowUp, now: number): FollowUp {
   // Unchanged text keeps its date: a later edit elsewhere or a hand-set deadline must not move it.
-  if (prev.quote === next.quote && prev.due?.phrase === next.due?.phrase) return prev;
-  const dueMoved = prev.due?.day !== next.due?.day;
-  return withEvent(prev, { quote: next.quote, action: next.action, due: next.due, nudges: dueMoved ? [] : prev.nudges }, dueMoved ? `Due date changed to ${next.due?.day ?? 'none'}` : 'Wording updated', now);
+  const sameDue = prev.quote === next.quote && (prev.dueByHand || prev.due?.phrase === next.due?.phrase);
+  const sameOwner = prev.owner.accountId === next.owner.accountId;
+  if (sameDue && sameOwner) return prev;
+  const due = sameDue ? prev.due : next.due;
+  const dueMoved = prev.due?.day !== due?.day;
+  const what = dueMoved ? `Due date changed to ${due?.day ?? 'none'}` : sameOwner ? 'Wording updated' : `Reassigned to ${next.owner.name}`;
+  return withEvent(prev, { quote: next.quote, action: next.action, owner: next.owner, due, dueByHand: sameDue && !!prev.dueByHand, nudges: dueMoved ? [] : prev.nudges }, what, now);
 }
 
 export type Timing = 'overdue' | 'today' | 'soon' | 'later' | 'undated';

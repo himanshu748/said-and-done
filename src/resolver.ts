@@ -63,7 +63,7 @@ resolver.define('setDue', async ({ payload, context }) => {
   const f = await editable(ctx, id);
   const tz = ctx.accountId ? (await getUser(productOf(ctx), ctx.accountId)).timeZone : 'UTC';
   const due = day ? { day, phrase: f.due?.phrase ?? 'set by hand', precision: 'day' as const, at: endOfDayInZone(day, tz) } : null;
-  const next = withEvent(f, { due, nudges: [] }, day ? `Due date set to ${day}` : 'Due date cleared', Date.now());
+  const next = withEvent(f, { due, dueByHand: true, nudges: [] }, day ? `Due date set to ${day}` : 'Due date cleared', Date.now());
   await saveFollowUp(next);
   return next;
 });
