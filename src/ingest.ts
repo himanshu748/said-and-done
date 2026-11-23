@@ -43,10 +43,11 @@ export async function ingest(args: { source: Source; doc: unknown; authorId: str
     const written = args.writtenAt.getTime();
     if (signal && !all.some((f) => f.settledBy === source.itemId)) {
       const open = all.filter(
-        (f) => !f.dismissed && f.owner.accountId === author.accountId && f.source.itemId !== source.itemId && (f.status === 'open' || (f.status === 'slipping' && signal === 'done')) && (f.writtenAt !== undefined ? f.writtenAt < written : f.createdAt < now),
+        (f) => f.owner.accountId === author.accountId && f.source.itemId !== source.itemId && (f.status === 'open' || (f.status === 'slipping' && signal === 'done')) && (f.writtenAt !== undefined ? f.writtenAt < written : f.createdAt < now),
       );
       const hit = pickPromise(open, text);
-      if (hit) {
+      // A reply about text marked not a promise settles nothing else.
+      if (hit && !hit.dismissed) {
         await saveFollowUp(withEvent(hit, { status: signal === 'done' ? 'kept' : 'slipping', settledBy: source.itemId }, signal === 'done' ? `Kept — ${author.name} replied` : `Slipping — ${author.name} asked for more time`, now));
         result.settled++;
       }
