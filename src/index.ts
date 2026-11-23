@@ -43,6 +43,7 @@ export async function sendReminders(): Promise<void> {
       if (f.source.product === 'jira') await addJiraComment(f.source.containerId, reminderDoc(f, kind));
       else await addPageComment(f.source.containerId, reminderDoc(f, kind));
       const cur = (await getFollowUp(f.id)) ?? f;
+      if (cur.due?.day !== f.due?.day) continue;
       await saveFollowUp(withEvent(cur, { nudges: [...cur.nudges, kind] }, kind === 'overdue' ? 'Overdue reminder posted' : 'Reminder posted', now));
       sent++;
     } catch (e) {

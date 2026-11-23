@@ -61,7 +61,8 @@ export async function ingest(args: { source: Source; doc: unknown; authorId: str
     next.writtenAt = args.writtenAt.getTime();
     if (args.backfill && next.due && next.due.at < now) next.nudges = ['before', 'overdue'];
     const prev = await getFollowUp(next.id);
-    const save = prev ? refresh(prev, next, now) : next;
+    const base = prev?.removed ? withEvent(prev, { status: 'open', removed: false }, 'Reopened — back on the page', now) : prev;
+    const save = base ? refresh(base, next, now) : next;
     if (save !== prev) await saveFollowUp(save);
     if (!prev) result.found++;
   }
@@ -81,8 +82,8 @@ export async function ingest(args: { source: Source; doc: unknown; authorId: str
   // A promise edited out of the page is no longer one.
   if (source.kind === 'page') {
     for (const f of await listForContainer(source.containerId)) {
-      if (f.source.itemId === source.itemId && (f.status === 'open' || f.status === 'slipping') && !seen.has(f.fingerprint)) {
-        await saveFollowUp(withEvent(f, { status: 'dropped' }, `Dropped — removed from the page by ${author.name}`, now));
+      if (f.source.itemId === source.itemId && (f.status === 'open' || f.status === 'slipping') && !seen.has(f.fingerprint) && (f.writtenAt ?? 0) <= args.writtenAt.getTime()) {
+        await saveFollowUp(withEvent(f, { status: 'dropped', removed: true }, `Dropped — removed from the page by ${author.name}`, now));
       }
     }
   }

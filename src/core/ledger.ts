@@ -41,6 +41,8 @@ export interface FollowUp {
   writtenAt?: number;
   /** The reply that settled it, so rereading that reply settles nothing else. */
   settledBy?: string;
+  /** Dropped because its text left the page; restoring the text reopens it. */
+  removed?: boolean;
   history: { at: number; what: string }[];
 }
 
@@ -76,7 +78,7 @@ export function withEvent(f: FollowUp, patch: Partial<FollowUp>, what: string, n
 /** Re-detected text keeps the record and its status; only wording and date move. */
 export function refresh(prev: FollowUp, next: FollowUp, now: number): FollowUp {
   // Unchanged text keeps its date: a later edit elsewhere or a hand-set deadline must not move it.
-  if (prev.quote === next.quote) return prev;
+  if (prev.quote === next.quote && prev.due?.phrase === next.due?.phrase) return prev;
   const dueMoved = prev.due?.day !== next.due?.day;
   return withEvent(prev, { quote: next.quote, action: next.action, due: next.due, nudges: dueMoved ? [] : prev.nudges }, dueMoved ? `Due date changed to ${next.due?.day ?? 'none'}` : 'Wording updated', now);
 }

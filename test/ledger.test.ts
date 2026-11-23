@@ -44,7 +44,7 @@ describe('ledger', () => {
     const f = { ...make("I'll send the redlines by Friday"), status: 'slipping' as const, nudges: ['before' as const] };
     expect(refresh(f, make("I'll send the redlines by Friday"), created + 1)).toBe(f);
     expect(refresh(f, make("I'll send the redlines by Friday", created + 3 * 86_400_000), created + 1)).toBe(f);
-    const handSet = { ...f, due: null };
+    const handSet = { ...f, due: f.due && { ...f.due, day: '2026-12-01' } };
     expect(refresh(handSet, make("I'll send the redlines by Friday"), created + 1)).toBe(handSet);
     const moved = refresh(f, make("I'll send the redlines by Dec 4"), created + 1);
     expect(moved).toMatchObject({ status: 'slipping', nudges: [], due: { day: '2026-12-04' } });
