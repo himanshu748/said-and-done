@@ -9,5 +9,5 @@ trap 'rm -rf "$out"' EXIT
 (cd "$root" && npm run build:ui)
 rsync -a --exclude .git --exclude node_modules "$root/" "$out/"
 ln -s "$root/node_modules" "$out/node_modules"
-sed -i -E "s#(  id: ari:cloud:ecosystem::app/).*#\1${JUDGE_APP_ID}#" "$out/manifest.yml"
+sed -E "s#(  id: ari:cloud:ecosystem::app/).*#\1${JUDGE_APP_ID}#" "$root/manifest.yml" > "$out/manifest.yml"
 cd "$out" && npx @forge/cli deploy -e "${FORGE_ENV:-production}" --non-interactive
