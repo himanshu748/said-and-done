@@ -8,6 +8,8 @@ export function jiraSource(issue: { id: string; key: string; summary: string }, 
 }
 
 export function ingestJiraComment(issue: { id: string; key: string; summary: string }, c: JiraComment, now: number, backfill = false): Promise<IngestResult> {
+  // Restricted comments stay private: tracking them would quote them in the ledger and in public reminders.
+  if ((c as { visibility?: unknown }).visibility) return Promise.resolve({ found: 0, settled: 0 });
   return ingest({ source: jiraSource(issue, c.id), doc: c.body, authorId: c.author?.accountId ?? '', writtenAt: new Date(c.created), now, backfill });
 }
 

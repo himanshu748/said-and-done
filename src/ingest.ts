@@ -39,21 +39,26 @@ export async function ingest(args: { source: Source; doc: unknown; authorId: str
   // A comment from an owner can settle their earlier promise in the same issue or page.
   if (source.kind !== 'page') {
     const signal = readSignal(text);
-    if (signal) {
-      const open = (await listForContainer(source.containerId)).filter(
-        (f) => f.owner.accountId === author.accountId && f.source.itemId !== source.itemId && (f.status === 'open' || (f.status === 'slipping' && signal === 'done')) && f.createdAt < now,
+    const all = signal ? await listForContainer(source.containerId) : [];
+    const written = args.writtenAt.getTime();
+    if (signal && !all.some((f) => f.settledBy === source.itemId)) {
+      const open = all.filter(
+        (f) => f.owner.accountId === author.accountId && f.source.itemId !== source.itemId && (f.status === 'open' || (f.status === 'slipping' && signal === 'done')) && (f.writtenAt !== undefined ? f.writtenAt < written : f.createdAt < now),
       );
       const hit = pickPromise(open, text);
       if (hit) {
-        await saveFollowUp(withEvent(hit, { status: signal === 'done' ? 'kept' : 'slipping' }, signal === 'done' ? `Kept — ${author.name} replied` : `Slipping — ${author.name} asked for more time`, now));
+        await saveFollowUp(withEvent(hit, { status: signal === 'done' ? 'kept' : 'slipping', settledBy: source.itemId }, signal === 'done' ? `Kept — ${author.name} replied` : `Slipping — ${author.name} asked for more time`, now));
         result.settled++;
       }
     }
   }
 
+  const seen = new Set<string>();
   for (const c of detectPromises(blocks, writtenOn)) {
+    seen.add(c.fingerprint);
     const owner = c.owner.kind === 'author' ? authorPerson : { accountId: c.owner.accountId, name: (await user(product, c.owner.accountId)).name || c.owner.name };
     const next = fromCandidate(c, { source, author: authorPerson, owner, timeZone: author.timeZone, now });
+    next.writtenAt = args.writtenAt.getTime();
     if (args.backfill && next.due && next.due.at < now) next.nudges = ['before', 'overdue'];
     const prev = await getFollowUp(next.id);
     const save = prev ? refresh(prev, next, now) : next;
@@ -65,10 +70,19 @@ export async function ingest(args: { source: Source; doc: unknown; authorId: str
   if (source.kind === 'page') {
     const ticked: Block[] = blocks.filter((b) => b.task?.state === 'DONE').map((b) => ({ ...b, task: { state: 'TODO', localId: b.task?.localId ?? '' } }));
     for (const c of detectPromises(ticked, writtenOn)) {
+      seen.add(c.fingerprint);
       const existing = (await listForContainer(source.containerId)).find((f) => f.fingerprint === c.fingerprint && f.source.itemId === source.itemId);
       if (existing && (existing.status === 'open' || existing.status === 'slipping')) {
         await saveFollowUp(withEvent(existing, { status: 'kept' }, `Kept — action item ticked by ${author.name}`, now));
         result.settled++;
+      }
+    }
+  }
+  // A promise edited out of the page is no longer one.
+  if (source.kind === 'page') {
+    for (const f of await listForContainer(source.containerId)) {
+      if (f.source.itemId === source.itemId && (f.status === 'open' || f.status === 'slipping') && !seen.has(f.fingerprint)) {
+        await saveFollowUp(withEvent(f, { status: 'dropped' }, `Dropped — removed from the page by ${author.name}`, now));
       }
     }
   }

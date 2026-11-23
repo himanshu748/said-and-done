@@ -8,7 +8,9 @@ const NEGATED = /(?:\b(?:not|yet to|still|almost|nearly|once|when|after|will be|
 const SLIPPING = /\b(running (?:a bit )?late|need (?:a bit |a little |some )?more time|push(?:ing)? (?:this|it) (?:back|out)|delayed|won['’]t make|can['’]t make|will be late|slipping|behind on|another (?:day|week) or two)\b/i;
 
 export function readSignal(text: string): Signal | null {
-  if (SLIPPING.test(text)) return 'slipping';
+  if (/\?\s*$/.test(text.trim())) return null;
+  const s = SLIPPING.exec(text);
+  if (s && !/(?:\bnot|n['’]t)\b[\w\s,'’]{0,12}$/i.test(text.slice(0, s.index))) return 'slipping';
   const m = DONE.exec(text);
   if (!m) return null;
   if (NEGATED.test(text.slice(0, m.index))) return null;

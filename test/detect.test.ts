@@ -82,6 +82,12 @@ describe('ADF', () => {
     expect(ps[0]).toMatchObject({ owner: { accountId: 'acc-2' }, action: 'send survey results', due: { day: '2026-12-02' } });
   });
 
+  it('keeps identical action items as separate promises', () => {
+    const item = (id: string) => ({ type: 'taskItem', attrs: { localId: id, state: 'TODO' }, content: [mention('acc-2', '@Lee'), t(' send survey results by Friday')] });
+    const doc = { type: 'doc', content: [{ type: 'taskList', content: [item('a1'), item('a2')] }] };
+    expect(detectPromises(adfToBlocks(doc), tue)).toHaveLength(2);
+  });
+
   it('skips code blocks and inline code', () => {
     const doc = { type: 'doc', content: [{ type: 'codeBlock', content: [t("I'll send it tomorrow")] }, { type: 'paragraph', content: [{ type: 'text', text: "I'll send it tomorrow", marks: [{ type: 'code' }] }] }] };
     expect(detectPromises(adfToBlocks(doc), tue)).toEqual([]);

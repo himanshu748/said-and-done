@@ -2,6 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { overlap, pickPromise, readSignal } from '../src/core/followup';
 
 describe('readSignal', () => {
+  it.each(['Is the contract signed?', "I'm not running late", 'Not delayed at all'])('ignores questions and denials: %s', (t) => {
+    expect(readSignal(t)).toBeNull();
+  });
   it.each(['Sent! Contract is attached.', 'Done — see the updated deck.', "Here's the signed NDA", 'Just shared the folder with you'])('done: %s', (t) => {
     expect(readSignal(t)).toBe('done');
   });

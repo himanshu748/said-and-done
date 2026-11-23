@@ -126,6 +126,7 @@ export function detectPromises(blocks: Block[], writtenOn: Ymd): PromiseCandidat
       const owner: Owner = assignee?.accountId ? { kind: 'mention', accountId: assignee.accountId, name: assignee.name } : { kind: 'author' };
       if (owner.kind === 'author' && !block.dates.length && !parseDue(block.text, writtenOn)) continue;
       const c = candidate(block.text.trim(), rest, owner, writtenOn, 'high', block.dates[0]);
+      if (c && block.task.localId) c.fingerprint = `${c.fingerprint}-${block.task.localId}`;
       if (c && !found.has(c.fingerprint)) found.set(c.fingerprint, c);
       continue;
     }

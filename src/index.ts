@@ -2,7 +2,7 @@ import { nudgeDue, withEvent } from './core/ledger';
 import { reminderDoc } from './core/reminder';
 import { addJiraComment, addPageComment, getIssue, getJiraComment, getPage, getPageComment } from './site';
 import { ingestJiraComment, ingestPage, ingestPageComment } from './sources';
-import { listFollowUps, saveFollowUp } from './store';
+import { getFollowUp, listFollowUps, saveFollowUp } from './store';
 
 export { handler } from './resolver';
 
@@ -42,7 +42,8 @@ export async function sendReminders(): Promise<void> {
     try {
       if (f.source.product === 'jira') await addJiraComment(f.source.containerId, reminderDoc(f, kind));
       else await addPageComment(f.source.containerId, reminderDoc(f, kind));
-      await saveFollowUp(withEvent(f, { nudges: [...f.nudges, kind] }, kind === 'overdue' ? 'Overdue reminder posted' : 'Reminder posted', now));
+      const cur = (await getFollowUp(f.id)) ?? f;
+      await saveFollowUp(withEvent(cur, { nudges: [...cur.nudges, kind] }, kind === 'overdue' ? 'Overdue reminder posted' : 'Reminder posted', now));
       sent++;
     } catch (e) {
       console.error(`reminder ${f.id} failed`, e);
