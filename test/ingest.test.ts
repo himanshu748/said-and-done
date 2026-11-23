@@ -43,7 +43,7 @@ describe('ingest', () => {
     await ingest(args);
     const [f] = [...db.values()];
     if (!f) throw new Error('not saved');
-    db.set(f.id, { ...f, dismissed: true });
+    db.set(f.id, { ...f, dismissed: true, settledBy: 'r1' });
 
     await ingest({ ...args, doc: task('@Sam to tidy the old notes by Monday'), writtenAt: new Date(at + 1000), now: at + 1000 });
     expect(db.get(f.id)?.dismissed).toBe(true);
@@ -52,5 +52,6 @@ describe('ingest', () => {
     expect(back.found).toBe(1);
     expect(db.get(f.id)).toMatchObject({ status: 'open', writtenAt: at + 2000, owner: { accountId: 'kim' }, action: expect.stringContaining('signed contract') });
     expect(db.get(f.id)?.dismissed).toBeUndefined();
+    expect(db.get(f.id)?.settledBy).toBe('r1');
   });
 });

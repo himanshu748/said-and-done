@@ -67,7 +67,8 @@ export async function ingest(args: { source: Source; doc: unknown; authorId: str
     // "I will…" belongs to whoever wrote it first, not to a later editor of the page.
     if (prev && !prev.dismissed && c.owner.kind === 'author') next.owner = prev.author;
     const base = prev?.dismissed ? undefined : prev?.removed ? withEvent(prev, { status: 'open', removed: false }, 'Reopened — back on the page', now) : prev;
-    const save = base ? refresh(base, next, now) : next;
+    // A reply that already settled the old text must not be reread against another promise.
+    const save = base ? refresh(base, next, now) : prev?.settledBy ? { ...next, settledBy: prev.settledBy } : next;
     if (save !== prev) await saveFollowUp(save);
     if (!prev || prev.dismissed) result.found++;
   }
