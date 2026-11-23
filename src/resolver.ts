@@ -40,7 +40,7 @@ resolver.define('list', async ({ context }) => {
   const product = productOf(ctx);
   const container = containerOf(ctx);
   // Panels sit on an issue or page the viewer already has open.
-  const items = (container ? await listForContainer(container) : await visible(product, await listFollowUps())).filter((f) => !f.dismissed);
+  const items = container ? await listForContainer(container) : await visible(product, await listFollowUps());
   const now = Date.now();
   return { product, now, viewer: ctx.accountId ?? null, scoped: Boolean(container), items: sortForLedger(items), stats: stats(items, now) };
 });

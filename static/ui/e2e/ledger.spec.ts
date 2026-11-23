@@ -51,9 +51,11 @@ test('not a promise hides a card with undo', async ({ page }) => {
   await card.getByRole('button', { name: 'Not a promise' }).click();
   await expect(card).toContainText('Hidden as not a promise');
   await expect(open).toContainText('3');
+  await page.getByRole('button', { name: 'Scan last 30 days' }).click();
+  await expect(page.getByRole('status')).toContainText('found 1 new promise');
   await card.getByRole('button', { name: 'Undo' }).click();
   await expect(card.getByRole('heading', { name: 'update the checklist' })).toBeVisible();
-  await expect(open).toContainText('4');
+  await expect(open).toContainText('5');
 });
 
 test('issue panel is compact and scoped', async ({ page }) => {

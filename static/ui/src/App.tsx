@@ -21,6 +21,8 @@ export function App() {
   const [data, setData] = useState<Ledger | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [scanning, setScanning] = useState<string | null>(null);
+  // Hidden here keep their Undo row until the page is left; the rest stay out of sight.
+  const [undoable, setUndoable] = useState<ReadonlySet<string>>(new Set());
 
   const refresh = useCallback(async () => {
     try {
@@ -50,14 +52,18 @@ export function App() {
     }
   };
 
-  const replace = (f: FollowUp) => setData((d) => (d ? { ...d, items: d.items.map((x) => (x.id === f.id ? f : x)) } : d));
+  const replace = (f: FollowUp) => {
+    if (f.dismissed) setUndoable((u) => new Set(u).add(f.id));
+    setData((d) => (d ? { ...d, items: d.items.map((x) => (x.id === f.id ? f : x)) } : d));
+  };
+  const shownData = useMemo(() => (data ? { ...data, items: data.items.filter((f) => !f.dismissed || undoable.has(f.id)) } : null), [data, undoable]);
 
   if (error && !data) return <div className="shell"><p className="notice notice--error" role="alert">{error}</p></div>;
-  if (!data || !mode) return <Loading />;
+  if (!shownData || !mode) return <Loading />;
   return mode === 'ledger' ? (
-    <LedgerView data={data} onChange={replace} onScan={onScan} scanning={scanning} error={error} />
+    <LedgerView data={shownData} onChange={replace} onScan={onScan} scanning={scanning} error={error} />
   ) : (
-    <PanelView data={data} onChange={replace} />
+    <PanelView data={shownData} onChange={replace} />
   );
 }
 
