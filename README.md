@@ -1,38 +1,31 @@
 # Said & Done
 
-A Forge app for Jira and Confluence that turns promises people write — *"I'll send the revised contract by Friday"*, *"@Ana to review the deck by Dec 12"*, an open action item with a date — into tracked follow-ups with an owner and a due date, and posts a reminder in the same thread the day before.
+**Promises in Jira and Confluence get buried before anyone follows up.**
 
-- **Detects** commitments in Jira comments, Confluence pages, page comments and action items. Owner: the writer, or the person @mentioned. Due date: 25+ phrasings (Friday, next week, EOD, Dec 12, the 15th, in 3 business days, end of Q1…), resolved in the writer's time zone.
-- **Settles** them from replies: the owner writing "sent, here it is" marks it kept; "running late" marks it slipping; ticking the action item on the page marks it kept.
-- **Learns from mistakes**: "Not a promise" hides a false match, with undo, and that text is never picked up again. **Mine** shows only what you owe.
-- **Reminds** once a day before the deadline and once after it passes, as a comment mentioning the owner.
-- **Ledger** page in Jira and Confluence with open/overdue/kept counts, plus an issue panel and a page byline item.
+<img src="docs/screenshots/jira-ledger-real.png" width="640" alt="Said & Done ledger with open, overdue, and kept follow-ups">
 
-Detection is deterministic and runs on Atlassian (Runs on Atlassian eligible): no LLM, no egress, nothing leaves the site.
+Said & Done gives a promise an owner and a due date, tracks replies, and sends
+reminders in the original conversation. Use **Mine** to see your own follow-ups
+and **Not a promise** to dismiss a false match.
 
-## Develop
+## How it uses Atlassian
 
-```bash
-npm ci
-npm run typecheck && npm run lint && npm test   # unit tests (Vitest)
-npm run build:ui && npm run test:e2e             # UI tests (Playwright, mocked bridge)
-forge deploy -e development && forge install -e development --site <site> --product jira   # and --product confluence
-```
+Forge listens for Jira and Confluence changes, stores follow-ups in Forge KVS,
+and runs scheduled reminders. The Jira issue panel, Confluence byline, and
+ledger show the same state. Detection uses the text and dates on the site.
 
-Judges install the unlisted **Said & Done (judge build)** copy, because an app submitted to the Marketplace [can't be shared by installation link](https://developer.atlassian.com/platform/forge/distribute-your-apps/). Deploy it from the same code with `JUDGE_APP_ID=700d5de2-08d6-447f-8640-89ba451c16af scripts/judge-build.sh`.
+## Quickstart
 
-`src/core` is pure (no Forge imports): ADF reading, promise detection, date parsing, follow-up rules. `src/` holds the Forge triggers, resolver and KVS store. `static/ui` is the Custom UI (React + Vite).
+From a fresh clone with Node 22 or newer:
 
-## Try it
+~~~sh
+npm ci && npm run build:ui
+~~~
 
-Development install on `one-atlas-obka.atlassian.net`: **Apps → Said & Done** in Jira and in Confluence.
+For a live test, use the judge build linked from Devpost. See
+[setup and examples](docs/development.md).
 
-1. On any Jira issue, comment: *"I'll share the updated schedule with the team by Thursday."*
-2. Open **Apps → Said & Done**: the promise is there with its owner and due date.
-3. Reply on the issue: *"Shared the updated schedule."* It moves to **Kept**.
-4. In Confluence, open **Apps → Said & Done** and press **Scan last 30 days** to pick up dated action items and promises on existing pages.
+[Video](https://youtu.be/_fGu7I4yyG0) · [Devpost](https://devpost.com/software/said-done-fmg1ez) ·
+[Privacy](PRIVACY.md)
 
-![Jira ledger](docs/screenshots/jira-ledger-real.png)
-![Confluence ledger](docs/screenshots/confluence-ledger-real.png)
-
-[Privacy policy](PRIVACY.md) · [Devpost draft](docs/devpost-draft.md) · [Marketplace listing draft](docs/marketplace-listing.md)
+This repository has no license file.
