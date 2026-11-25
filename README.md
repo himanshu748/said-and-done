@@ -28,4 +28,4 @@ For a live test, use the judge build linked from Devpost. See
 [Video](https://youtu.be/_fGu7I4yyG0) · [Devpost](https://devpost.com/software/said-done-fmg1ez) ·
 [Privacy](PRIVACY.md)
 
-This repository has no license file.
+[MIT License](LICENSE).
