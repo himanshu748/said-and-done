@@ -35,4 +35,4 @@ Development install on `one-atlas-obka.atlassian.net`: **Apps → Said & Done** 
 ![Jira ledger](docs/screenshots/jira-ledger-real.png)
 ![Confluence ledger](docs/screenshots/confluence-ledger-real.png)
 
-[Privacy policy](PRIVACY.md) · [Devpost draft](docs/devpost-draft.md) · [Marketplace listing draft](docs/marketplace-listing.md)
+[Privacy policy](PRIVACY.md) · [Setup and demo](docs/development.md)
