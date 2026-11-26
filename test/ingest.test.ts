@@ -50,6 +50,22 @@ describe('ingest', () => {
     expect([...db.values()]).toMatchObject([{ status: 'dropped', removed: true }]);
   });
 
+  it('ignores older snapshots after a page promise is removed and restored', async () => {
+    const page: Source = { ...source('p1'), product: 'confluence', kind: 'page', containerId: 'p1' };
+    const promise = doc("I'll send the redlines by Friday");
+    const ingestVersion = (body: unknown, writtenAt: number) =>
+      ingest({ source: page, doc: body, authorId: 'acc', writtenAt: new Date(writtenAt), now: at + 5000 });
+
+    await ingestVersion(promise, at);
+    await ingestVersion(doc(''), at + 1000);
+    await ingestVersion(promise, at);
+    expect([...db.values()]).toMatchObject([{ status: 'dropped', writtenAt: at + 1000 }]);
+
+    await ingestVersion(promise, at + 2000);
+    await ingestVersion(doc(''), at + 1000);
+    expect([...db.values()]).toMatchObject([{ status: 'open', writtenAt: at + 2000 }]);
+  });
+
   it('brings back a dismissed action item rewritten as a new commitment', async () => {
     const task = (text: string) => ({ type: 'doc', version: 1, content: [{ type: 'taskList', attrs: { localId: 'l1' }, content: [{ type: 'taskItem', attrs: { localId: 't1', state: 'TODO' }, content: [{ type: 'text', text }] }] }] });
     const page: Source = { ...source('p1'), product: 'confluence', kind: 'page', containerId: 'p1' };
