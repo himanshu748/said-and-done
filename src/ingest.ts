@@ -76,7 +76,12 @@ export async function ingest(args: { source: Source; doc: unknown; authorId: str
     const prev = await getFollowUp(next.id);
     if (isPage && prev && pageSnapshotAt(prev) > writtenAt) continue;
     // Same commitment stays hidden; an action item rewritten in place is a new one.
-    if (prev?.dismissed && prev.action === next.action) continue;
+    if (prev?.dismissed && prev.action === next.action) {
+      if (isPage && pageSnapshotAt(prev) < writtenAt) {
+        await saveFollowUp({ ...prev, pageSnapshotAt: writtenAt });
+      }
+      continue;
+    }
     // "I will…" belongs to whoever wrote it first, not to a later editor of the page.
     if (prev && !prev.dismissed && c.owner.kind === 'author') next.owner = prev.author;
     const base = prev?.dismissed ? undefined : prev?.removed ? withEvent(prev, { status: 'open', removed: false, writtenAt }, 'Reopened — back on the page', now) : prev;
