@@ -77,11 +77,35 @@ describe('ingest', () => {
 
     await ingest({ ...args, doc: task('@Sam to tidy the old notes by Monday'), writtenAt: new Date(at + 1000), now: at + 1000 });
     expect(db.get(f.id)?.dismissed).toBe(true);
+    await ingest({ ...args, doc: task('I will send the signed contract to Legal by Friday'), writtenAt: new Date(at + 500), now: at + 1000 });
+    expect(db.get(f.id)?.dismissed).toBe(true);
 
     const back = await ingest({ ...args, doc: task('I will send the signed contract to Legal by Friday'), authorId: 'kim', writtenAt: new Date(at + 2000), now: at + 2000 });
     expect(back.found).toBe(1);
     expect(db.get(f.id)).toMatchObject({ status: 'open', writtenAt: at + 2000, owner: { accountId: 'kim' }, action: expect.stringContaining('signed contract') });
     expect(db.get(f.id)?.dismissed).toBeUndefined();
     expect(db.get(f.id)?.settledBy).toBe('r1');
+  });
+
+  it('ignores a delayed tick after a newer page still shows the task open', async () => {
+    const task = (state: 'TODO' | 'DONE') => ({
+      type: 'doc', version: 1,
+      content: [{ type: 'taskList', attrs: { localId: 'l1' }, content: [{
+        type: 'taskItem', attrs: { localId: 't1', state },
+        content: [{ type: 'text', text: 'I will send the signed contract by Friday' }],
+      }] }],
+    });
+    const page: Source = { ...source('p1'), product: 'confluence', kind: 'page', containerId: 'p1' };
+    const ingestTask = (state: 'TODO' | 'DONE', writtenAt: number) =>
+      ingest({ source: page, doc: task(state), authorId: 'acc', writtenAt: new Date(writtenAt), now: at + 5000 });
+
+    await ingestTask('TODO', at);
+    await ingestTask('TODO', at + 2000);
+    expect((await ingestTask('DONE', at + 1000)).settled).toBe(0);
+    expect([...db.values()]).toMatchObject([{ status: 'open', writtenAt: at, pageSnapshotAt: at + 2000 }]);
+
+    expect((await ingestTask('DONE', at + 3000)).settled).toBe(1);
+    expect((await ingestTask('DONE', at + 3000)).settled).toBe(0);
+    expect([...db.values()]).toMatchObject([{ status: 'kept', writtenAt: at, pageSnapshotAt: at + 3000 }]);
   });
 });
