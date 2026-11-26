@@ -36,6 +36,20 @@ describe('ingest', () => {
     expect([...db.values()].map((x) => x.status)).toEqual(['open', 'open']);
   });
 
+  it('drops promises only when a valid page edit clears them', async () => {
+    const page: Source = { ...source('p1'), product: 'confluence', kind: 'page', containerId: 'p1' };
+    const args = { source: page, doc: doc("I'll send the redlines by Friday"), authorId: 'acc', writtenAt: new Date(at), now: at };
+    expect((await ingest(args)).found).toBe(1);
+
+    const now = at + 1000;
+    await ingest({ ...args, doc: undefined, writtenAt: new Date(now), now });
+    await ingest({ ...args, doc: doc(''), writtenAt: new Date(at - 1000), now });
+    expect([...db.values()]).toMatchObject([{ status: 'open' }]);
+
+    await ingest({ ...args, doc: doc(''), writtenAt: new Date(now), now });
+    expect([...db.values()]).toMatchObject([{ status: 'dropped', removed: true }]);
+  });
+
   it('brings back a dismissed action item rewritten as a new commitment', async () => {
     const task = (text: string) => ({ type: 'doc', version: 1, content: [{ type: 'taskList', attrs: { localId: 'l1' }, content: [{ type: 'taskItem', attrs: { localId: 't1', state: 'TODO' }, content: [{ type: 'text', text }] }] }] });
     const page: Source = { ...source('p1'), product: 'confluence', kind: 'page', containerId: 'p1' };

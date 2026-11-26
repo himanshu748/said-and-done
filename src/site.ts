@@ -114,11 +114,11 @@ export interface ConfluenceComment extends V2Body {
 
 export function adfOf(x: V2Body): unknown {
   const v = x.body?.atlas_doc_format?.value;
-  if (!v) return { type: 'doc', content: [] };
+  if (!v) return undefined;
   try {
     return JSON.parse(v) as unknown;
   } catch {
-    return { type: 'doc', content: [] };
+    return undefined;
   }
 }
 

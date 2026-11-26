@@ -29,7 +29,13 @@ export async function ingest(args: { source: Source; doc: unknown; authorId: str
   const product = source.product;
   const blocks = adfToBlocks(args.doc);
   const text = blocks.map((b) => b.text).join('\n');
-  if (!text.trim() || text.includes(MARKER) || !args.authorId) return { found: 0, settled: 0 };
+  if (text.includes(MARKER) || !args.authorId) return { found: 0, settled: 0 };
+  if (!text.trim()) {
+    const doc = args.doc as { type?: unknown; content?: unknown } | null | undefined;
+    if (source.kind !== 'page' || doc?.type !== 'doc' || !Array.isArray(doc.content)) {
+      return { found: 0, settled: 0 };
+    }
+  }
   const author = await user(product, args.authorId);
   if (author.isApp) return { found: 0, settled: 0 };
   const writtenOn = dayInZone(args.writtenAt, author.timeZone);
