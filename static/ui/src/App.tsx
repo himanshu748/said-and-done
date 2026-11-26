@@ -23,6 +23,7 @@ export function App() {
   const [scanning, setScanning] = useState<string | null>(null);
   // Hidden here keep their Undo row until the page is left; the rest stay out of sight.
   const [undoable, setUndoable] = useState<ReadonlySet<string>>(new Set());
+  const startupAttempt = useRef(0);
 
   const refresh = useCallback(async () => {
     try {
@@ -33,12 +34,24 @@ export function App() {
     }
   }, []);
 
-  useEffect(() => {
-    void getContext().then((c) => {
+  const start = useCallback(async () => {
+    const attempt = ++startupAttempt.current;
+    setError(null);
+    try {
+      const c = await getContext();
+      const ledger = await loadLedger();
+      if (attempt !== startupAttempt.current) return;
       setMode(c.moduleKey.endsWith('ledger') ? 'ledger' : 'panel');
-      void refresh();
-    });
-  }, [refresh]);
+      setData(ledger);
+    } catch (e) {
+      if (attempt === startupAttempt.current) setError(e instanceof Error ? e.message : String(e));
+    }
+  }, []);
+
+  useEffect(() => {
+    void start();
+    return () => { startupAttempt.current++; };
+  }, [start]);
 
   const onScan = async () => {
     setScanning('Reading the last 30 days…');
@@ -58,7 +71,12 @@ export function App() {
   };
   const shownData = useMemo(() => (data ? { ...data, items: data.items.filter((f) => !f.dismissed || undoable.has(f.id)) } : null), [data, undoable]);
 
-  if (error && !data) return <div className="shell"><p className="notice notice--error" role="alert">{error}</p></div>;
+  if (error && !data) return (
+    <div className="shell">
+      <p className="notice notice--error" role="alert">{error}</p>
+      <button className="btn btn--primary" type="button" onClick={() => { void start(); }}>Try again</button>
+    </div>
+  );
   if (!shownData || !mode) return <Loading />;
   return mode === 'ledger' ? (
     <LedgerView data={shownData} onChange={replace} onScan={onScan} scanning={scanning} error={error} />

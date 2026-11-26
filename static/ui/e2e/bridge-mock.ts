@@ -10,6 +10,7 @@ declare global {
   interface Window {
     __sdCalls?: { name: string; payload: unknown }[];
     __sdNav?: string[];
+    __sdAllowStartup?: boolean;
   }
 }
 
@@ -63,7 +64,10 @@ function stats() {
 export async function invoke(name: string, payload?: Record<string, unknown>): Promise<unknown> {
   window.__sdCalls?.push({ name, payload });
   await new Promise((r) => setTimeout(r, 30));
-  if (name === 'list') return { product: moduleKey.startsWith('confluence') ? 'confluence' : 'jira', now: NOW, viewer: 'a-legal', scoped: !moduleKey.endsWith('ledger'), items, stats: stats() };
+  if (name === 'list') {
+    if (params.get('startupError') === 'list' && !window.__sdAllowStartup) throw new Error('Could not load promises');
+    return { product: moduleKey.startsWith('confluence') ? 'confluence' : 'jira', now: NOW, viewer: 'a-legal', scoped: !moduleKey.endsWith('ledger'), items, stats: stats() };
+  }
   if (name === 'setStatus' || name === 'setDue') {
     const f = items.find((x) => x.id === payload?.['id']);
     if (!f) throw new Error('missing');
@@ -89,7 +93,10 @@ export async function invoke(name: string, payload?: Record<string, unknown>): P
 }
 
 export const view = {
-  getContext: async () => ({ moduleKey, extension: {} }),
+  getContext: async () => {
+    if (params.get('startupError') === 'context' && !window.__sdAllowStartup) throw new Error('Could not load the Atlassian context');
+    return { moduleKey, extension: {} };
+  },
   theme: {
     enable: async () => {
       document.documentElement.dataset['colorMode'] = params.get('theme') === 'dark' ? 'dark' : 'light';

@@ -1,5 +1,16 @@
 import { expect, test } from '@playwright/test';
 
+for (const [stage, message] of [['context', 'Could not load the Atlassian context'], ['list', 'Could not load promises']] as const) {
+  test(`recovers when ${stage} fails on startup`, async ({ page }) => {
+    await page.goto(`/?startupError=${stage}`);
+    await expect(page.getByRole('alert')).toContainText(message);
+    await page.evaluate(() => { window.__sdAllowStartup = true; });
+    await page.getByRole('button', { name: 'Try again' }).click();
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('kept track of');
+    await expect(page.getByRole('alert')).toHaveCount(0);
+  });
+}
+
 test('ledger groups open promises by deadline and settles one', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByRole('heading', { level: 1 })).toContainText('kept track of');
