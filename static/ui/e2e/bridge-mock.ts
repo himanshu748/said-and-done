@@ -11,6 +11,7 @@ declare global {
     __sdCalls?: { name: string; payload: unknown }[];
     __sdNav?: string[];
     __sdAllowStartup?: boolean;
+    __sdAllowScanRefresh?: boolean;
   }
 }
 
@@ -66,6 +67,9 @@ export async function invoke(name: string, payload?: Record<string, unknown>): P
   await new Promise((r) => setTimeout(r, 30));
   if (name === 'list') {
     if (params.get('startupError') === 'list' && !window.__sdAllowStartup) throw new Error('Could not load promises');
+    if (params.get('holdScanRefresh') === '1' && window.__sdCalls?.some((call) => call.name === 'scan')) {
+      while (!window.__sdAllowScanRefresh) await new Promise((resolve) => setTimeout(resolve, 20));
+    }
     return { product: moduleKey.startsWith('confluence') ? 'confluence' : 'jira', now: NOW, viewer: 'a-legal', scoped: !moduleKey.endsWith('ledger'), items, stats: stats() };
   }
   if (name === 'setStatus' || name === 'setDue') {

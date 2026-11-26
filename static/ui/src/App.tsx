@@ -15,6 +15,7 @@ const GROUPS: { key: Timing; label: string }[] = [
 
 const live = (f: FollowUp) => f.status === 'open' || f.status === 'slipping';
 const counted = (items: FollowUp[]) => items.filter((f) => !f.dismissed);
+const SCAN_IN_PROGRESS = 'Reading the last 30 days…';
 
 export function App() {
   const [mode, setMode] = useState<'ledger' | 'panel' | null>(null);
@@ -54,11 +55,12 @@ export function App() {
   }, [start]);
 
   const onScan = async () => {
-    setScanning('Reading the last 30 days…');
+    if (scanning === SCAN_IN_PROGRESS) return;
+    setScanning(SCAN_IN_PROGRESS);
     try {
       const r = await scan();
-      setScanning(r.found ? `Read ${r.scanned} ${r.scanned === 1 ? 'item' : 'items'}, found ${r.found} new ${r.found === 1 ? 'promise' : 'promises'}.` : `Read ${r.scanned} ${r.scanned === 1 ? 'item' : 'items'}. No new promises.`);
       await refresh();
+      setScanning(r.found ? `Read ${r.scanned} ${r.scanned === 1 ? 'item' : 'items'}, found ${r.found} new ${r.found === 1 ? 'promise' : 'promises'}.` : `Read ${r.scanned} ${r.scanned === 1 ? 'item' : 'items'}. No new promises.`);
     } catch (e) {
       setScanning(null);
       setError(e instanceof Error ? e.message : String(e));
@@ -101,6 +103,7 @@ function LedgerView({ data, onChange, onScan, scanning, error }: { data: Ledger;
   const now = data.now;
   const s = useMemo(() => stats(data.items, now), [data, now]);
   const where = data.product === 'jira' ? 'Jira comments' : 'Confluence pages and comments';
+  const scanInProgress = scanning === SCAN_IN_PROGRESS;
 
   const shown = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -137,7 +140,7 @@ function LedgerView({ data, onChange, onScan, scanning, error }: { data: Ledger;
           <p className="hero__lede">Promises written in {where} become follow-ups with an owner and a date. Reminders land in the same thread a day before.</p>
         </div>
         <div className="hero__actions">
-          <button className="btn btn--primary" type="button" onClick={onScan} disabled={scanning === 'Reading the last 30 days…'}>
+          <button className="btn btn--primary" type="button" onClick={onScan} disabled={scanInProgress}>
             <span className="btn__dot" aria-hidden="true" />
             Scan last 30 days
           </button>
@@ -155,7 +158,7 @@ function LedgerView({ data, onChange, onScan, scanning, error }: { data: Ledger;
       </section>
 
       {data.items.length === 0 ? (
-        <Empty product={data.product} onScan={onScan} />
+        <Empty product={data.product} onScan={onScan} scanInProgress={scanInProgress} />
       ) : (
         <>
           <div className="toolbar">
@@ -374,7 +377,7 @@ function Details({ f, busy, onDue }: { f: FollowUp; busy: boolean; onDue: (day: 
   );
 }
 
-function Empty({ product, onScan }: { product: Ledger['product']; onScan: () => void }) {
+function Empty({ product, onScan, scanInProgress }: { product: Ledger['product']; onScan: () => void; scanInProgress: boolean }) {
   return (
     <section className="empty">
       <div className="empty__art" aria-hidden="true">
@@ -388,7 +391,7 @@ function Empty({ product, onScan }: { product: Ledger['product']; onScan: () => 
       <p>
         From now on, any {product === 'jira' ? 'Jira comment' : 'Confluence page or comment'} with a commitment shows up here. To pick up what was already written, scan the last 30 days.
       </p>
-      <button type="button" className="btn btn--primary" onClick={onScan}>
+      <button type="button" className="btn btn--primary" onClick={onScan} disabled={scanInProgress}>
         Scan last 30 days
       </button>
     </section>

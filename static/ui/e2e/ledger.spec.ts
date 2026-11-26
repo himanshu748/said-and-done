@@ -47,6 +47,23 @@ test('empty ledger scans the last 30 days', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'send the onboarding pack' })).toBeVisible();
 });
 
+test('both scan buttons stay disabled until the refreshed ledger arrives', async ({ page }) => {
+  await page.goto('/?empty=1&holdScanRefresh=1');
+  const scanButtons = page.getByRole('button', { name: 'Scan last 30 days' });
+  await expect(scanButtons).toHaveCount(2);
+  await scanButtons.first().click();
+  await page.waitForFunction(() => {
+    const calls = window.__sdCalls ?? [];
+    const scanIndex = calls.findIndex(({ name }) => name === 'scan');
+    return scanIndex >= 0 && calls.slice(scanIndex + 1).some(({ name }) => name === 'list');
+  });
+  await expect(scanButtons.first()).toBeDisabled({ timeout: 1500 });
+  await expect(scanButtons.last()).toBeDisabled({ timeout: 1500 });
+  await page.evaluate(() => { window.__sdAllowScanRefresh = true; });
+  await expect(page.getByRole('heading', { name: 'send the onboarding pack' })).toBeVisible();
+  await expect(scanButtons).toBeEnabled();
+});
+
 test('mine shows only the viewer\'s promises', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('tab', { name: /Mine/ }).click();
