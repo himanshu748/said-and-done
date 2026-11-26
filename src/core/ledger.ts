@@ -39,6 +39,8 @@ export interface FollowUp {
   nudges: Nudge[];
   /** When the source text was written, for ordering replies. */
   writtenAt?: number;
+  /** Most recent Confluence page snapshot that covered this promise. */
+  pageSnapshotAt?: number;
   /** The reply that settled it, so rereading that reply settles nothing else. */
   settledBy?: string;
   /** Dropped because its text left the page; restoring the text reopens it. */

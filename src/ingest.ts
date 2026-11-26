@@ -13,6 +13,10 @@ export interface IngestResult {
   settled: number;
 }
 
+function pageSnapshotAt(f: FollowUp): number {
+  return f.pageSnapshotAt ?? f.writtenAt ?? 0;
+}
+
 const users = new Map<string, Promise<SiteUser>>();
 function user(product: Product, accountId: string): Promise<SiteUser> {
   const k = `${product}:${accountId}`;
@@ -27,12 +31,13 @@ function user(product: Product, accountId: string): Promise<SiteUser> {
 export async function ingest(args: { source: Source; doc: unknown; authorId: string; writtenAt: Date; now: number; backfill?: boolean }): Promise<IngestResult> {
   const { source, now } = args;
   const product = source.product;
+  const isPage = source.kind === 'page';
   const blocks = adfToBlocks(args.doc);
   const text = blocks.map((b) => b.text).join('\n');
   if (text.includes(MARKER) || !args.authorId) return { found: 0, settled: 0 };
   if (!text.trim()) {
     const doc = args.doc as { type?: unknown; content?: unknown } | null | undefined;
-    if (source.kind !== 'page' || doc?.type !== 'doc' || !Array.isArray(doc.content)) {
+    if (!isPage || doc?.type !== 'doc' || !Array.isArray(doc.content)) {
       return { found: 0, settled: 0 };
     }
   }
@@ -44,7 +49,7 @@ export async function ingest(args: { source: Source; doc: unknown; authorId: str
   const authorPerson = { accountId: author.accountId, name: author.name };
 
   // A comment from an owner can settle their earlier promise in the same issue or page.
-  if (source.kind !== 'page') {
+  if (!isPage) {
     const signal = readSignal(text);
     const all = signal ? await listForContainer(source.containerId) : [];
     const written = args.writtenAt.getTime();
@@ -69,35 +74,39 @@ export async function ingest(args: { source: Source; doc: unknown; authorId: str
     next.writtenAt = writtenAt;
     if (args.backfill && next.due && next.due.at < now) next.nudges = ['before', 'overdue'];
     const prev = await getFollowUp(next.id);
-    if (source.kind === 'page' && prev && (prev.writtenAt ?? 0) > writtenAt) continue;
+    if (isPage && prev && pageSnapshotAt(prev) > writtenAt) continue;
     // Same commitment stays hidden; an action item rewritten in place is a new one.
     if (prev?.dismissed && prev.action === next.action) continue;
     // "I will…" belongs to whoever wrote it first, not to a later editor of the page.
     if (prev && !prev.dismissed && c.owner.kind === 'author') next.owner = prev.author;
     const base = prev?.dismissed ? undefined : prev?.removed ? withEvent(prev, { status: 'open', removed: false, writtenAt }, 'Reopened — back on the page', now) : prev;
     // A reply that already settled the old text must not be reread against another promise.
-    const save = base ? refresh(base, next, now) : prev?.settledBy ? { ...next, settledBy: prev.settledBy } : next;
+    let save = base ? refresh(base, next, now) : prev?.settledBy ? { ...next, settledBy: prev.settledBy } : next;
+    if (isPage && save.pageSnapshotAt !== writtenAt) save = { ...save, pageSnapshotAt: writtenAt };
     if (save !== prev) await saveFollowUp(save);
     if (!prev || prev.dismissed) result.found++;
   }
 
   // Ticked action items on a page settle their promise.
-  if (source.kind === 'page') {
+  if (isPage) {
     const ticked: Block[] = blocks.filter((b) => b.task?.state === 'DONE').map((b) => ({ ...b, task: { state: 'TODO', localId: b.task?.localId ?? '' } }));
     for (const c of detectPromises(ticked, writtenOn)) {
       seen.add(c.fingerprint);
       const existing = (await listForContainer(source.containerId)).find((f) => f.fingerprint === c.fingerprint && f.source.itemId === source.itemId);
-      if (existing && !existing.dismissed && (existing.writtenAt ?? 0) <= writtenAt && (existing.status === 'open' || existing.status === 'slipping')) {
-        await saveFollowUp(withEvent(existing, { status: 'kept' }, `Kept — action item ticked by ${author.name}`, now));
+      if (!existing || existing.dismissed || pageSnapshotAt(existing) > writtenAt) continue;
+      if (existing.status === 'open' || existing.status === 'slipping') {
+        await saveFollowUp(withEvent(existing, { status: 'kept', pageSnapshotAt: writtenAt }, `Kept — action item ticked by ${author.name}`, now));
         result.settled++;
+      } else if (pageSnapshotAt(existing) < writtenAt) {
+        await saveFollowUp({ ...existing, pageSnapshotAt: writtenAt });
       }
     }
   }
   // A promise edited out of the page is no longer one.
-  if (source.kind === 'page') {
+  if (isPage) {
     for (const f of await listForContainer(source.containerId)) {
-      if (f.source.itemId === source.itemId && !f.dismissed && (f.status === 'open' || f.status === 'slipping') && !seen.has(f.fingerprint) && (f.writtenAt ?? 0) <= writtenAt) {
-        await saveFollowUp(withEvent(f, { status: 'dropped', removed: true, writtenAt }, `Dropped — removed from the page by ${author.name}`, now));
+      if (f.source.itemId === source.itemId && !f.dismissed && (f.status === 'open' || f.status === 'slipping') && !seen.has(f.fingerprint) && pageSnapshotAt(f) <= writtenAt) {
+        await saveFollowUp(withEvent(f, { status: 'dropped', removed: true, writtenAt, pageSnapshotAt: writtenAt }, `Dropped — removed from the page by ${author.name}`, now));
       }
     }
   }
