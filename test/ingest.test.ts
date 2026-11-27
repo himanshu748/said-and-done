@@ -35,6 +35,25 @@ describe('ingest', () => {
     expect([...db.values()].map((record) => record.owner.name)).toEqual(['Someone', 'Priya', 'Priya']);
   });
 
+  it('repairs a stored comment link on rescan without changing the record history', async () => {
+    const comment: Source = {
+      ...source('456'),
+      product: 'confluence',
+      kind: 'page-comment',
+      containerId: '123',
+      url: '/wiki/pages/viewpage.action?pageId=123?focusedCommentId=456',
+    };
+    const args = { source: comment, doc: doc("I'll send the redlines by Friday"), authorId: 'acc', writtenAt: new Date(at), now: at };
+    await ingest(args);
+    const [record] = [...db.values()];
+    if (!record) throw new Error('not saved');
+    db.set(record.id, { ...record, status: 'kept' });
+    const repaired = { ...comment, url: '/wiki/pages/viewpage.action?pageId=123&focusedCommentId=456' };
+
+    expect((await ingest({ ...args, source: repaired, now: at + 1000, backfill: true })).found).toBe(0);
+    expect([...db.values()]).toEqual([{ ...record, source: repaired, status: 'kept' }]);
+  });
+
   it('only settles promises from the same product when container IDs match', async () => {
     const page: Source = { ...source('p1'), product: 'confluence', kind: 'page' };
     await ingest({ source: page, doc: doc("I'll send the redlines by Friday"), authorId: 'acc', writtenAt: new Date(at), now: at });

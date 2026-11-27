@@ -31,6 +31,8 @@ export async function ingestPage(p: ConfluencePage, now: number, backfill = fals
 export async function ingestPageComment(c: ConfluenceComment, now: number, page?: ConfluencePage, backfill = false): Promise<IngestResult> {
   if (!c.pageId) return { found: 0, settled: 0 };
   const p = page ?? (await getPage(c.pageId));
+  const url = new URL(`/wiki${p._links?.webui ?? `/pages/viewpage.action?pageId=${p.id}`}`, 'https://confluence.invalid');
+  url.searchParams.set('focusedCommentId', c.id);
   const source: Source = {
     product: 'confluence',
     kind: 'page-comment',
@@ -38,7 +40,7 @@ export async function ingestPageComment(c: ConfluenceComment, now: number, page?
     containerKey: await spaceKey(p.spaceId),
     title: p.title,
     itemId: c.id,
-    url: `/wiki${p._links?.webui ?? `/pages/viewpage.action?pageId=${p.id}`}?focusedCommentId=${c.id}`,
+    url: `${url.pathname}${url.search}${url.hash}`,
   };
   return ingest({ source, doc: adfOf(c), authorId: c.version?.authorId ?? '', writtenAt: new Date(c.version?.createdAt ?? Date.now()), now, backfill });
 }
