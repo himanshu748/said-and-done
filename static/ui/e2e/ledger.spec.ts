@@ -13,6 +13,7 @@ for (const [stage, message] of [['context', 'Could not load the Atlassian contex
 
 test('ledger groups open promises by deadline and settles one', async ({ page }) => {
   await page.goto('/');
+  await expect(page.getByText('Local demo with sample data. Reload to reset your changes.')).toBeVisible();
   await expect(page.getByRole('heading', { level: 1 })).toContainText('kept track of');
   const overdue = page.getByRole('region', { name: 'Overdue' });
   await expect(overdue.getByRole('heading', { name: 'send the redlined MSA' })).toBeVisible();
@@ -24,6 +25,8 @@ test('ledger groups open promises by deadline and settles one', async ({ page })
   await expect(overdue).toHaveCount(0);
   await page.getByRole('tab', { name: /Kept/ }).click();
   await expect(page.getByRole('listitem').filter({ hasText: 'send the redlined MSA' })).toContainText('Kept');
+  await page.reload();
+  await expect(overdue.getByRole('heading', { name: 'send the redlined MSA' })).toBeVisible();
 });
 
 test('opens the source, edits a date and searches', async ({ page }) => {

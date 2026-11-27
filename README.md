@@ -20,11 +20,12 @@ ledger show the same state. Detection uses the text and dates on the site.
 From a fresh clone with Node 22 or newer:
 
 ~~~sh
-npm ci && npm run build:ui
+npm ci && npm run demo
 ~~~
 
-For a live test, use the judge build linked from Devpost. See
-[setup and examples](docs/development.md).
+Open [localhost:4173](http://localhost:4173) to try the ledger with sample data.
+For a live test, sign in as an admin of a site with Jira and Confluence and use
+the judge build linked from Devpost. See [setup and examples](docs/development.md).
 
 [Video](https://youtu.be/_fGu7I4yyG0) · [Devpost](https://devpost.com/software/said-done-fmg1ez) ·
 [Privacy](PRIVACY.md)
