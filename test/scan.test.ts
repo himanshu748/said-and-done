@@ -32,11 +32,11 @@ it('imports only Jira comments in the advertised scan window', async () => {
   if (!scan) throw new Error('Scan resolver was not registered');
   const clock = vi.spyOn(Date, 'now').mockReturnValue(Date.parse('2026-11-27T12:00:00Z'));
   const recent = { id: 'recent', created: '2026-10-28T12:00:00Z' };
-  searchRecentIssues.mockResolvedValue([{ id: '12', key: 'APP-1', fields: { summary: 'Draft', comment: { comments: [
+  searchRecentIssues.mockResolvedValue({ items: [{ id: '12', key: 'APP-1', fields: { summary: 'Draft', comment: { comments: [
     { id: 'old', created: '2026-10-28T11:59:59Z' },
     recent,
     { id: 'invalid', created: 'unavailable' },
-  ] } } }]);
+  ] } } }], more: false });
   ingestJiraComment.mockResolvedValue({ found: 1 });
   try {
     expect(await scan({ context: { moduleKey: 'jira-ledger' } })).toEqual({ scanned: 1, found: 1, partial: true });
@@ -48,10 +48,10 @@ it('imports only Jira comments in the advertised scan window', async () => {
 
 it('keeps scanning other pages and reports partial results when comments cannot be read', async () => {
   const recent = new Date(Date.now() - 60_000).toISOString();
-  recentPages.mockResolvedValue([{ id: 'first', createdAt: recent }, { id: 'second', createdAt: recent }]);
+  recentPages.mockResolvedValue({ items: [{ id: 'first', createdAt: recent }, { id: 'second', createdAt: recent }], more: false });
   ingestPage.mockResolvedValue({ found: 0 });
   ingestPageComment.mockResolvedValue({ found: 1 });
-  pageComments.mockRejectedValueOnce(new Error('comments unavailable')).mockResolvedValueOnce([{ id: 'visible', version: { createdAt: recent } }]);
+  pageComments.mockRejectedValueOnce(new Error('comments unavailable')).mockResolvedValueOnce({ items: [{ id: 'visible', version: { createdAt: recent } }], more: false });
 
   const scan = handlers.scan;
   if (!scan) throw new Error('Scan resolver was not registered');
@@ -70,8 +70,8 @@ it('ignores older Confluence snapshots while scanning their recent footer commen
   const oldPage = { id: 'old-page', createdAt: old };
   const edited = { id: 'edited-page', createdAt: old, version: { createdAt: recent } };
   const newComment = { id: 'recent-comment', version: { createdAt: recent } };
-  recentPages.mockResolvedValue([oldPage, edited]);
-  pageComments.mockResolvedValueOnce([{ id: 'old-comment', version: { createdAt: old } }, newComment]).mockResolvedValueOnce([]);
+  recentPages.mockResolvedValue({ items: [oldPage, edited], more: false });
+  pageComments.mockResolvedValueOnce({ items: [{ id: 'old-comment', version: { createdAt: old } }, newComment], more: false }).mockResolvedValueOnce({ items: [], more: false });
   ingestPage.mockClear().mockResolvedValue({ found: 1 });
   ingestPageComment.mockClear().mockResolvedValue({ found: 1 });
   try {

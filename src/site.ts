@@ -4,6 +4,7 @@ import type { Person } from './core/ledger';
 
 export type Product = 'jira' | 'confluence';
 export type As = 'app' | 'user';
+interface ScanPage<T> { items: T[]; more: boolean }
 
 const client = (as: As) => (as === 'app' ? api.asApp() : api.asUser());
 
@@ -51,16 +52,17 @@ export async function getIssue(issueId: string): Promise<{ id: string; key: stri
 export interface JiraIssueWithComments {
   id: string;
   key: string;
-  fields: { summary: string; comment?: { comments: JiraComment[] } };
+  fields: { summary: string; comment?: { comments: JiraComment[]; total?: number } };
 }
 
-export async function searchRecentIssues(as: As, days: number, max: number): Promise<JiraIssueWithComments[]> {
+export async function searchRecentIssues(as: As, days: number, max: number): Promise<ScanPage<JiraIssueWithComments>> {
   const res = await client(as).requestJira(route`/rest/api/3/search/jql`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
     body: JSON.stringify({ jql: `updated >= -${days}d ORDER BY updated DESC`, maxResults: max, fields: ['summary', 'comment'] }),
   });
-  return (await json<{ issues: JiraIssueWithComments[] }>(res, 'search')).issues;
+  const page = await json<{ issues: JiraIssueWithComments[]; isLast?: boolean; nextPageToken?: string }>(res, 'search');
+  return { items: page.issues, more: page.isLast === false || Boolean(page.nextPageToken) };
 }
 
 /** Ids of the issues the viewer can see, out of `ids`. */
@@ -138,14 +140,16 @@ export async function getSpaceKey(spaceId: string): Promise<string> {
   }
 }
 
-export async function recentPages(as: As, limit: number): Promise<ConfluencePage[]> {
+export async function recentPages(as: As, limit: number): Promise<ScanPage<ConfluencePage>> {
   const res = await client(as).requestConfluence(route`/wiki/api/v2/pages?sort=-modified-date&limit=${limit}&body-format=atlas_doc_format`);
-  return (await json<{ results: ConfluencePage[] }>(res, 'pages')).results;
+  const page = await json<{ results: ConfluencePage[]; _links?: { next?: string } }>(res, 'pages');
+  return { items: page.results, more: Boolean(page._links?.next) };
 }
 
-export async function pageComments(as: As, pageId: string): Promise<ConfluenceComment[]> {
+export async function pageComments(as: As, pageId: string): Promise<ScanPage<ConfluenceComment>> {
   const res = await client(as).requestConfluence(route`/wiki/api/v2/pages/${pageId}/footer-comments?body-format=atlas_doc_format&limit=50`);
-  return (await json<{ results: ConfluenceComment[] }>(res, 'page comments')).results.map((c) => ({ ...c, pageId }));
+  const page = await json<{ results: ConfluenceComment[]; _links?: { next?: string } }>(res, 'page comments');
+  return { items: page.results.map((c) => ({ ...c, pageId })), more: Boolean(page._links?.next) };
 }
 
 export async function visiblePageIds(ids: string[]): Promise<Set<string>> {
