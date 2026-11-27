@@ -90,6 +90,7 @@ export async function ingest(args: { source: Source; doc: unknown; authorId: str
     const base = prev?.dismissed ? undefined : prev?.removed ? withEvent(prev, { status: 'open', removed: false, writtenAt }, 'Reopened — back on the page', now) : prev;
     // A reply that already settled the old text must not be reread against another promise.
     let save = base ? refresh(base, next, now) : prev?.settledBy ? { ...next, settledBy: prev.settledBy } : next;
+    if (source.kind === 'page-comment' && save.source.url !== source.url) save = { ...save, source: { ...save.source, url: source.url } };
     if (isPage && save.pageSnapshotAt !== writtenAt) save = { ...save, pageSnapshotAt: writtenAt };
     if (save !== prev) await saveFollowUp(save);
     if (!prev || prev.dismissed) result.found++;
