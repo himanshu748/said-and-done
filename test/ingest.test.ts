@@ -154,6 +154,13 @@ describe('ingest', () => {
       id: 'promise', body: doc("I'll send the redlines by Friday"), author, created: '2026-11-24T09:00:00Z',
     }, now, true);
 
+    const unrelated = {
+      id: 'unrelated', body: doc('Sent the electricity invoice.'), author,
+      created: '2026-10-01T12:00:00Z', updated: '2026-11-26T12:00:00Z',
+    };
+    expect(await ingestJiraComment(issue, unrelated, now, true, { settlementOnly: true })).toEqual({ found: 0, settled: 0 });
+    expect([...db.values()]).toMatchObject([{ status: 'open' }]);
+
     const reply = {
       id: 'reply', body: doc("Sent the redlines. I'll file the binder by Friday."), author,
       created: '2026-10-01T12:00:00Z', updated: '2026-11-27T12:00:00Z',
