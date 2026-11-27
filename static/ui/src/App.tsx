@@ -60,7 +60,9 @@ export function App() {
     try {
       const r = await scan();
       await refresh();
-      setScanning(r.found ? `Read ${r.scanned} ${r.scanned === 1 ? 'item' : 'items'}, found ${r.found} new ${r.found === 1 ? 'promise' : 'promises'}.` : `Read ${r.scanned} ${r.scanned === 1 ? 'item' : 'items'}. No new promises.`);
+      const read = `Read ${r.scanned} ${r.scanned === 1 ? 'item' : 'items'}`;
+      const summary = r.found ? `${read}, found ${r.found} new ${r.found === 1 ? 'promise' : 'promises'}.` : `${read}. No new promises in those items.`;
+      setScanning(r.partial ? `Scan incomplete. ${summary}` : summary);
     } catch (e) {
       setScanning(null);
       setError(e instanceof Error ? e.message : String(e));

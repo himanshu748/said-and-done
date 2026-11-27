@@ -47,6 +47,14 @@ test('empty ledger scans the last 30 days', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'send the onboarding pack' })).toBeVisible();
 });
 
+test('labels an incomplete scan and still shows its results', async ({ page }) => {
+  await page.goto('/?module=confluence-ledger&empty=1&partialScan=1');
+  await page.getByRole('button', { name: 'Scan last 30 days' }).first().click();
+  await expect(page.getByRole('status')).toContainText('Scan incomplete');
+  await expect(page.getByRole('status')).toContainText('found 1 new promise');
+  await expect(page.getByRole('heading', { name: 'send the onboarding pack' })).toBeVisible();
+});
+
 test('both scan buttons stay disabled until the refreshed ledger arrives', async ({ page }) => {
   await page.goto('/?empty=1&holdScanRefresh=1');
   const scanButtons = page.getByRole('button', { name: 'Scan last 30 days' });
