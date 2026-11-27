@@ -82,3 +82,30 @@ it('ignores older Confluence snapshots while scanning their recent footer commen
     clock.mockRestore();
   }
 });
+
+it('continues a Jira scan after an individual comment cannot be recorded', async () => {
+  const scan = handlers.scan;
+  if (!scan) throw new Error('Scan resolver was not registered');
+  const recent = new Date(Date.now() - 60_000).toISOString();
+  const comments = [{ id: 'unavailable', created: recent }, { id: 'visible', created: recent }];
+  searchRecentIssues.mockResolvedValue({ items: [{ id: '12', key: 'APP-1', fields: { summary: 'Draft', comment: { comments } } }], more: false });
+  ingestJiraComment.mockClear().mockRejectedValueOnce(new Error('Could not record comment')).mockResolvedValueOnce({ found: 1 });
+
+  expect(await scan({ context: { moduleKey: 'jira-ledger' } })).toEqual({ scanned: 1, found: 1, partial: true });
+  expect(ingestJiraComment.mock.calls.map((call) => call[1].id)).toEqual(['unavailable', 'visible']);
+});
+
+it('continues reading footer comments when their page cannot be recorded', async () => {
+  const scan = handlers.scan;
+  if (!scan) throw new Error('Scan resolver was not registered');
+  const recent = new Date(Date.now() - 60_000).toISOString();
+  const page = { id: 'page', createdAt: recent };
+  const comments = [{ id: 'unavailable', version: { createdAt: recent } }, { id: 'visible', version: { createdAt: recent } }];
+  recentPages.mockResolvedValue({ items: [page], more: false });
+  pageComments.mockResolvedValue({ items: comments, more: false });
+  ingestPage.mockRejectedValueOnce(new Error('Could not record page'));
+  ingestPageComment.mockClear().mockRejectedValueOnce(new Error('Could not record comment')).mockResolvedValueOnce({ found: 1 });
+
+  expect(await scan({ context: { moduleKey: 'confluence-ledger' } })).toEqual({ scanned: 1, found: 1, partial: true });
+  expect(ingestPageComment.mock.calls.map((call) => call[0].id)).toEqual(['unavailable', 'visible']);
+});

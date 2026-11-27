@@ -99,6 +99,14 @@ resolver.define('scan', async ({ context }) => {
     if (!Number.isFinite(time)) partial = true;
     return time >= since && time <= now;
   };
+  const record = async (item: Promise<{ found: number }>) => {
+    try {
+      found += (await item).found;
+      scanned++;
+    } catch {
+      partial = true;
+    }
+  };
   if (productOf(ctx) === 'jira') {
     const issues = await searchRecentIssues('user', scanDays, 40);
     partial ||= issues.more;
@@ -111,8 +119,7 @@ resolver.define('scan', async ({ context }) => {
         if (timedOut()) break;
         // An issue updated in the scan window can still contain older comments.
         if (!inScanWindow(c.created)) continue;
-        found += (await ingestJiraComment({ id: issue.id, key: issue.key, summary: issue.fields.summary }, c, now, true)).found;
-        scanned++;
+        await record(ingestJiraComment({ id: issue.id, key: issue.key, summary: issue.fields.summary }, c, now, true));
       }
     }
   } else {
@@ -121,8 +128,7 @@ resolver.define('scan', async ({ context }) => {
     for (const p of pages.items) {
       if (timedOut()) break;
       if (inScanWindow(p.version?.createdAt ?? p.createdAt)) {
-        found += (await ingestPage(p, now, true)).found;
-        scanned++;
+        await record(ingestPage(p, now, true));
       }
       // Recent footer comments can belong to a page whose own text is older.
       if (timedOut()) break;
@@ -131,8 +137,7 @@ resolver.define('scan', async ({ context }) => {
       for (const c of comments.items) {
         if (timedOut()) break;
         if (!inScanWindow(c.version?.createdAt)) continue;
-        found += (await ingestPageComment(c, now, p, true)).found;
-        scanned++;
+        await record(ingestPageComment(c, now, p, true));
       }
     }
   }
