@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { stats } from '../src/core/ledger';
 import type { FollowUp, Source } from '../src/core/ledger';
 
 const db = new Map<string, FollowUp>();
@@ -100,6 +101,28 @@ describe('ingest', () => {
     const reply = await ingest({ source: source('reply'), doc: doc('Sent the redlines.'), authorId: 'acc', writtenAt: new Date(later), now: later });
     expect(reply.settled).toBe(0);
     expect([...db.values()]).toMatchObject([{ status: 'open', source: { product: 'confluence' } }]);
+  });
+
+  it.each([
+    [Date.UTC(2026, 10, 27, 12), 100],
+    [Date.UTC(2026, 10, 28, 12), 0],
+  ])('uses the original reply time for backfilled on-time totals', async (repliedAt, keptOnTime) => {
+    const now = Date.UTC(2026, 10, 30, 12);
+    const scanReply = () => ingest({
+      source: source('reply'), doc: doc('Sent the redlines.'), authorId: 'acc',
+      writtenAt: new Date(repliedAt), now, backfill: true,
+    });
+    await ingest({
+      source: source('promise'), doc: doc("I'll send the redlines by Friday"), authorId: 'acc',
+      writtenAt: new Date(at), now, backfill: true,
+    });
+
+    expect((await scanReply()).settled).toBe(1);
+    expect((await scanReply()).settled).toBe(0);
+    expect(stats([...db.values()], now).keptOnTime).toBe(keptOnTime);
+    expect([...db.values()]).toMatchObject([{ status: 'kept', updatedAt: now, history: [
+      { at: now, what: 'Promise found' }, { at: repliedAt, what: expect.stringContaining('Kept') },
+    ] }]);
   });
 
   it('never brings back text marked not a promise', async () => {

@@ -63,7 +63,7 @@ export async function ingest(args: { source: Source; doc: unknown; authorId: str
       const hit = pickPromise(open, text);
       // A reply about text marked not a promise settles nothing else.
       if (hit && !hit.dismissed) {
-        await saveFollowUp(withEvent(hit, { status: signal === 'done' ? 'kept' : 'slipping', settledBy: source.itemId }, signal === 'done' ? `Kept — ${author.name} replied` : `Slipping — ${author.name} asked for more time`, now));
+        await saveFollowUp(withEvent(hit, { status: signal === 'done' ? 'kept' : 'slipping', settledBy: source.itemId }, signal === 'done' ? `Kept — ${author.name} replied` : `Slipping — ${author.name} asked for more time`, now, writtenAt));
         result.settled++;
       }
     }
