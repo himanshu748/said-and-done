@@ -115,6 +115,40 @@ test('selects the handoff text if the clipboard is blocked', async ({ page }) =>
   expect(await draft.evaluate((el: HTMLTextAreaElement) => el.selectionEnd - el.selectionStart)).toBe((await draft.inputValue()).length);
 });
 
+test('requires a fresh handoff after the matching open promises change', async ({ page, context }) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  await page.goto('/');
+  await page.getByRole('tab', { name: /Mine/ }).click();
+  await page.getByRole('button', { name: 'Prepare handoff' }).click();
+
+  const draft = page.getByRole('textbox', { name: 'Handoff draft' });
+  const copy = page.getByRole('button', { name: 'Copy draft' });
+  const refresh = page.getByRole('button', { name: 'Refresh handoff draft' });
+  const search = page.getByRole('searchbox', { name: 'Search promises' });
+  await expect(draft).toHaveValue(/send the redlined MSA/);
+  await expect(draft).not.toHaveValue(/share the final banner set/);
+
+  await search.fill('checklist');
+  await expect(copy).toBeDisabled();
+  await expect(page.getByText('Refresh the draft to copy the current handoff.')).toBeVisible();
+  await expect(draft).toHaveValue(/send the redlined MSA/);
+  await refresh.click();
+  await expect(draft).toHaveValue(/update the checklist/);
+  await expect(draft).not.toHaveValue(/send the redlined MSA/);
+  await page.getByRole('tab', { name: /^All/ }).click();
+  await copy.click();
+  await expect(page.getByText('Copied to clipboard.')).toBeVisible();
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(await draft.inputValue());
+
+  const checklist = page.getByRole('listitem').filter({ hasText: 'update the checklist' });
+  await checklist.getByRole('button', { name: 'Mark kept' }).click();
+  await expect(checklist).toContainText('Kept');
+  await expect(page.getByText('No open promises match your filters.')).toBeVisible();
+  await expect(copy).toBeDisabled();
+  await expect(refresh).toBeDisabled();
+  await expect(page.getByText('Copied to clipboard.')).toHaveCount(0);
+});
+
 test('not a promise hides a card with undo', async ({ page }) => {
   await page.goto('/');
   const open = page.getByRole('tab', { name: /^Open/ });
