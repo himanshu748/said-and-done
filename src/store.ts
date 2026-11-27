@@ -1,5 +1,5 @@
 import { kvs, WhereConditions } from '@forge/kvs';
-import type { FollowUp } from './core/ledger';
+import type { FollowUp, Source } from './core/ledger';
 
 const PREFIX = 'fu:';
 
@@ -22,6 +22,6 @@ export async function listFollowUps(): Promise<FollowUp[]> {
   return out;
 }
 
-export async function listForContainer(containerId: string): Promise<FollowUp[]> {
-  return (await listFollowUps()).filter((f) => f.source.containerId === containerId);
+export async function listForContainer(product: Source['product'], containerId: string): Promise<FollowUp[]> {
+  return (await listFollowUps()).filter((f) => f.source.product === product && f.source.containerId === containerId);
 }

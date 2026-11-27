@@ -51,7 +51,7 @@ export async function ingest(args: { source: Source; doc: unknown; authorId: str
   // A comment from an owner can settle their earlier promise in the same issue or page.
   if (!isPage) {
     const signal = readSignal(text);
-    const all = signal ? await listForContainer(source.containerId) : [];
+    const all = signal ? await listForContainer(product, source.containerId) : [];
     const written = args.writtenAt.getTime();
     if (signal && !all.some((f) => f.settledBy === source.itemId)) {
       const open = all.filter(
@@ -97,7 +97,7 @@ export async function ingest(args: { source: Source; doc: unknown; authorId: str
     const ticked: Block[] = blocks.filter((b) => b.task?.state === 'DONE').map((b) => ({ ...b, task: { state: 'TODO', localId: b.task?.localId ?? '' } }));
     for (const c of detectPromises(ticked, writtenOn)) {
       seen.add(c.fingerprint);
-      const existing = (await listForContainer(source.containerId)).find((f) => f.fingerprint === c.fingerprint && f.source.itemId === source.itemId);
+      const existing = (await listForContainer(product, source.containerId)).find((f) => f.fingerprint === c.fingerprint && f.source.itemId === source.itemId);
       if (!existing || existing.dismissed || pageSnapshotAt(existing) > writtenAt) continue;
       if (existing.status === 'open' || existing.status === 'slipping') {
         await saveFollowUp(withEvent(existing, { status: 'kept', pageSnapshotAt: writtenAt }, `Kept — action item ticked by ${author.name}`, now));
@@ -109,7 +109,7 @@ export async function ingest(args: { source: Source; doc: unknown; authorId: str
   }
   // A promise edited out of the page is no longer one.
   if (isPage) {
-    for (const f of await listForContainer(source.containerId)) {
+    for (const f of await listForContainer(product, source.containerId)) {
       if (f.source.itemId === source.itemId && !f.dismissed && (f.status === 'open' || f.status === 'slipping') && !seen.has(f.fingerprint) && pageSnapshotAt(f) <= writtenAt) {
         await saveFollowUp(withEvent(f, { status: 'dropped', removed: true, writtenAt, pageSnapshotAt: writtenAt }, `Dropped — removed from the page by ${author.name}`, now));
       }

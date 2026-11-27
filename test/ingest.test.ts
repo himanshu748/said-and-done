@@ -5,7 +5,7 @@ const db = new Map<string, FollowUp>();
 vi.mock('../src/store', () => ({
   getFollowUp: async (id: string) => db.get(id),
   saveFollowUp: async (f: FollowUp) => void db.set(f.id, f),
-  listForContainer: async (c: string) => [...db.values()].filter((f) => f.source.containerId === c),
+  listForContainer: async (product: Source['product'], c: string) => [...db.values()].filter((f) => f.source.product === product && f.source.containerId === c),
 }));
 vi.mock('../src/site', () => ({
   getUser: async (_p: string, accountId: string) => ({ accountId, name: 'Sam', timeZone: 'UTC', isApp: false }),
@@ -19,6 +19,15 @@ const at = Date.UTC(2026, 10, 24, 9);
 
 describe('ingest', () => {
   beforeEach(() => db.clear());
+
+  it('only settles promises from the same product when container IDs match', async () => {
+    const page: Source = { ...source('p1'), product: 'confluence', kind: 'page' };
+    await ingest({ source: page, doc: doc("I'll send the redlines by Friday"), authorId: 'acc', writtenAt: new Date(at), now: at });
+    const later = at + 1000;
+    const reply = await ingest({ source: source('reply'), doc: doc('Sent the redlines.'), authorId: 'acc', writtenAt: new Date(later), now: later });
+    expect(reply.settled).toBe(0);
+    expect([...db.values()]).toMatchObject([{ status: 'open', source: { product: 'confluence' } }]);
+  });
 
   it('never brings back text marked not a promise', async () => {
     const args = { source: source('1'), doc: doc("I'll send the redlines by Friday"), authorId: 'acc', writtenAt: new Date(at), now: at };

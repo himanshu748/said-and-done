@@ -18,10 +18,11 @@ const containerOf = (ctx: Ctx): string | null => {
 };
 
 async function visible(product: Product, items: FollowUp[]): Promise<FollowUp[]> {
-  const ids = [...new Set(items.map((f) => f.source.containerId))];
+  const scoped = items.filter((f) => f.source.product === product);
+  const ids = [...new Set(scoped.map((f) => f.source.containerId))];
   if (!ids.length) return [];
   const ok = product === 'jira' ? await visibleIssueIds(ids) : await visiblePageIds(ids);
-  return items.filter((f) => ok.has(f.source.containerId));
+  return scoped.filter((f) => ok.has(f.source.containerId));
 }
 
 async function editable(ctx: Ctx, id: string): Promise<FollowUp> {
@@ -40,7 +41,7 @@ resolver.define('list', async ({ context }) => {
   const product = productOf(ctx);
   const container = containerOf(ctx);
   // Panels sit on an issue or page the viewer already has open.
-  const items = container ? await listForContainer(container) : await visible(product, await listFollowUps());
+  const items = container ? await listForContainer(product, container) : await visible(product, await listFollowUps());
   const now = Date.now();
   return { product, now, viewer: ctx.accountId ?? null, scoped: Boolean(container), items: sortForLedger(items), stats: stats(items, now) };
 });
