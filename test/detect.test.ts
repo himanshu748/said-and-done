@@ -62,6 +62,21 @@ describe('ADF', () => {
     expect(p).toMatchObject({ owner: { kind: 'mention', accountId: 'acc-1', name: 'Ana Diaz' }, action: 'review the vendor MSA', due: { day: '2026-12-12' } });
   });
 
+  it('keeps mention locations after collapsing copied whitespace', () => {
+    const doc = { type: 'doc', content: [{ type: 'paragraph', content: [
+      t('Agreed.  '), t('\t '), mention('acc-1', '@Ana  Diaz'), t('  to review the vendor MSA by Dec 12.'),
+    ] }] };
+    const [block] = adfToBlocks(doc);
+    const [owner] = block?.mentions ?? [];
+    expect(block?.text).toBe('Agreed. @Ana Diaz to review the vendor MSA by Dec 12.');
+    expect(block?.text.slice(owner?.start, owner?.end)).toBe('@Ana Diaz');
+    expect(detectPromises(block ? [block] : [], tue)[0]).toMatchObject({
+      owner: { kind: 'mention', accountId: 'acc-1' },
+      action: 'review the vendor MSA',
+      due: { day: '2026-12-12' },
+    });
+  });
+
   it('does not treat a question to a person as their promise', () => {
     const doc = { type: 'doc', content: [{ type: 'paragraph', content: [mention('acc-1', '@Ana'), t(' will you send it by Friday?')] }] };
     expect(detectPromises(adfToBlocks(doc), tue)).toEqual([]);
