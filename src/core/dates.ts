@@ -44,6 +44,14 @@ export const weekday = (v: Ymd): number => toUtc(v).getUTCDay();
 const lastDayOfMonth = (y: number, m: number): Ymd => fromUtc(new Date(Date.UTC(y, m, 0)));
 export const compareYmd = (a: Ymd, b: Ymd): number => toUtc(a).getTime() - toUtc(b).getTime();
 
+function validDate({ y, m, d }: Ymd): boolean {
+  return y > 0 && y <= 9999 && m >= 1 && m <= 12 && d >= 1 && d <= lastDayOfMonth(y, m).d;
+}
+
+export function isCalendarDay(day: string): boolean {
+  return /^\d{4}-\d{2}-\d{2}$/.test(day) && validDate(parseYmd(day));
+}
+
 /** Business days after `v` (Mon-Fri). */
 export function addBusinessDays(v: Ymd, n: number): Ymd {
   let cur = v;
@@ -105,7 +113,7 @@ function monthIndex(word: string): number {
 
 /** A day-month without a year: this year, or next year if that day has clearly passed. */
 function resolveDayMonth(today: Ymd, month: number, day: number): Ymd | null {
-  if (month < 1 || month > 12 || day < 1 || day > lastDayOfMonth(today.y, month).d) return null;
+  if (month < 1 || month > 12 || day < 1 || day > 31) return null;
   const sameYear = { y: today.y, m: month, d: day };
   // A date up to 7 days back is a late reply ("by Dec 1" written Dec 3), not next year.
   return compareYmd(sameYear, addDays(today, -7)) < 0 ? { y: today.y + 1, m: month, d: day } : sameYear;
@@ -211,7 +219,7 @@ export function parseDue(sentence: string, writtenOn: Ymd): DueDate | null {
     const m = rule.re.exec(sentence);
     if (!m) continue;
     const r = rule.resolve(m, writtenOn);
-    if (!r) continue;
+    if (!r || !validDate(r.day)) continue;
     if (!best || m.index < best.index) best = { index: m.index, due: { day: formatYmd(r.day), phrase: m[0].trim(), precision: r.precision } };
   }
   return best?.due ?? null;

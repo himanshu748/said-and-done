@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { dayInZone, endOfDayInZone, parseDue, parseYmd } from '../src/core/dates';
+import { dayInZone, endOfDayInZone, isCalendarDay, parseDue, parseYmd } from '../src/core/dates';
 
 // Written on Tuesday 2026-11-24.
 const tue = parseYmd('2026-11-24');
@@ -43,10 +43,29 @@ describe('parseDue', () => {
     expect(parseDue("I'll send it Friday, or Monday at the latest", tue)).toMatchObject({ day: '2026-11-27', phrase: 'Friday' });
   });
 
+  it.each(['by February 29, 2027', 'by 31 April 2027', 'by December 0, 2027', 'on 2027-02-29'])('ignores impossible dates in "%s"', (text) => {
+    expect(parseDue(text, tue)).toBeNull();
+  });
+
+  it('accepts an explicit leap day and resolves a yearless leap day in the intended year', () => {
+    expect(due('by February 29, 2028')).toBe('2028-02-29');
+    expect(parseDue('by February 29', parseYmd('2027-11-24'))?.day).toBe('2028-02-29');
+  });
+
   it('marks week and month precision', () => {
     expect(parseDue('next week', tue)?.precision).toBe('week');
     expect(parseDue('end of month', tue)?.precision).toBe('month');
   });
+});
+
+it.each([
+  ['2028-02-29', true],
+  ['2027-02-29', false],
+  ['2027-04-31', false],
+  ['2027-12-00', false],
+  ['2027-2-01', false],
+])('validates the calendar day used for manual edits: %s', (day, valid) => {
+  expect(isCalendarDay(day)).toBe(valid);
 });
 
 describe('time zones', () => {
