@@ -6,7 +6,8 @@
 
 Said & Done gives a promise an owner and a due date, tracks replies, and sends
 reminders in the original conversation. Use **Mine** to see your own follow-ups
-and **Not a promise** to dismiss a false match.
+and **Not a promise** to dismiss a false match. Use **Prepare handoff** to turn
+the open promises matching your filters into a copyable update with source links.
 
 ## How it uses Atlassian
 

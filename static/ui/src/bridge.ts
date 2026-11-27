@@ -16,12 +16,13 @@ export interface Ledger {
 
 export interface Context {
   moduleKey: string;
+  siteUrl: string | undefined;
 }
 
 export const getContext = async (): Promise<Context> => {
   void view.theme?.enable?.().catch(() => undefined);
-  const c = (await view.getContext()) as { moduleKey?: string };
-  return { moduleKey: c.moduleKey ?? 'jira-ledger' };
+  const c = await view.getContext();
+  return { moduleKey: c.moduleKey ?? 'jira-ledger', siteUrl: c.siteUrl };
 };
 
 export const loadLedger = (): Promise<Ledger> => invoke<Ledger>('list');
