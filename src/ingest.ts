@@ -99,6 +99,9 @@ export async function ingest(args: { source: Source; doc: unknown; authorId: str
       save = { ...save, owner };
     }
     if (source.kind === 'page-comment' && save.source.url !== source.url) save = { ...save, source: { ...save.source, url: source.url } };
+    if (product === 'confluence' && source.containerKey && !save.source.containerKey) {
+      save = { ...save, source: { ...save.source, containerKey: source.containerKey } };
+    }
     if (isPage && save.pageSnapshotAt !== writtenAt) save = { ...save, pageSnapshotAt: writtenAt };
     if (save !== prev) await saveFollowUp(save);
     if (!prev || prev.dismissed) result.found++;

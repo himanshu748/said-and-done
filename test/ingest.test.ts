@@ -79,6 +79,20 @@ describe('ingest', () => {
     expect([...db.values()]).toEqual([{ ...record, source: repaired, status: 'kept' }]);
   });
 
+  it.each(['page', 'page-comment'] as const)('repairs a missing space key on a stored %s commitment', async (kind) => {
+    const confluence: Source = { ...source('123'), product: 'confluence', kind, containerKey: '' };
+    const args = { source: confluence, doc: doc("I'll send the redlines by Friday"), authorId: 'acc', writtenAt: new Date(at), now: at };
+    await ingest(args);
+    const [record] = [...db.values()];
+    if (!record) throw new Error('not saved');
+    const kept: FollowUp = { ...record, status: 'kept' };
+    db.set(record.id, kept);
+    const repaired = { ...confluence, containerKey: 'OPS' };
+
+    expect((await ingest({ ...args, source: repaired, now: at + 1000 })).found).toBe(0);
+    expect([...db.values()]).toEqual([{ ...kept, source: repaired }]);
+  });
+
   it('only settles promises from the same product when container IDs match', async () => {
     const page: Source = { ...source('p1'), product: 'confluence', kind: 'page' };
     await ingest({ source: page, doc: doc("I'll send the redlines by Friday"), authorId: 'acc', writtenAt: new Date(at), now: at });
