@@ -38,6 +38,7 @@ export interface JiraComment {
   id: string;
   body: unknown;
   created: string;
+  updated?: string;
   author?: { accountId: string; displayName?: string; accountType?: string };
 }
 

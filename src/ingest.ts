@@ -31,7 +31,7 @@ function user(product: Product, accountId: string): Promise<SiteUser> {
   return u;
 }
 
-export async function ingest(args: { source: Source; doc: unknown; authorId: string; writtenAt: Date; now: number; backfill?: boolean }): Promise<IngestResult> {
+export async function ingest(args: { source: Source; doc: unknown; authorId: string; writtenAt: Date; replyAt?: number; now: number; backfill?: boolean }): Promise<IngestResult> {
   const { source, now } = args;
   const product = source.product;
   const isPage = source.kind === 'page';
@@ -55,15 +55,15 @@ export async function ingest(args: { source: Source; doc: unknown; authorId: str
   if (!isPage) {
     const signal = readSignal(text);
     const all = signal ? await listForContainer(product, source.containerId) : [];
-    const written = args.writtenAt.getTime();
+    const replyAt = args.replyAt ?? writtenAt;
     if (signal && !all.some((f) => f.settledBy === source.itemId)) {
       const open = all.filter(
-        (f) => f.owner.accountId === author.accountId && f.source.itemId !== source.itemId && (f.status === 'open' || (f.status === 'slipping' && signal === 'done')) && (f.writtenAt !== undefined ? f.writtenAt < written : f.createdAt < now),
+        (f) => f.owner.accountId === author.accountId && f.source.itemId !== source.itemId && (f.status === 'open' || (f.status === 'slipping' && signal === 'done')) && (f.writtenAt !== undefined ? f.writtenAt < replyAt : f.createdAt < now),
       );
       const hit = pickPromise(open, text);
       // A reply about text marked not a promise settles nothing else.
       if (hit && !hit.dismissed) {
-        await saveFollowUp(withEvent(hit, { status: signal === 'done' ? 'kept' : 'slipping', settledBy: source.itemId }, signal === 'done' ? `Kept — ${author.name} replied` : `Slipping — ${author.name} asked for more time`, now, writtenAt));
+        await saveFollowUp(withEvent(hit, { status: signal === 'done' ? 'kept' : 'slipping', settledBy: source.itemId }, signal === 'done' ? `Kept — ${author.name} replied` : `Slipping — ${author.name} asked for more time`, now, replyAt));
         result.settled++;
       }
     }
