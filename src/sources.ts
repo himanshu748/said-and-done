@@ -17,7 +17,10 @@ const spaceKeys = new Map<string, Promise<string>>();
 function spaceKey(id: string): Promise<string> {
   let k = spaceKeys.get(id);
   if (!k) {
-    k = getSpaceKey(id);
+    k = getSpaceKey(id).then((key) => {
+      if (!key) spaceKeys.delete(id);
+      return key;
+    });
     spaceKeys.set(id, k);
   }
   return k;
