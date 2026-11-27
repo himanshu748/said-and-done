@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { stats } from '../src/core/ledger';
 import type { FollowUp, Source } from '../src/core/ledger';
 
 const db = new Map<string, FollowUp>();
@@ -13,6 +14,7 @@ vi.mock('../src/site', () => ({
 
 const { ingest } = await import('../src/ingest');
 const { getUser } = await import('../src/site');
+const { ingestJiraComment } = await import('../src/sources');
 
 const doc = (text: string) => ({ type: 'doc', version: 1, content: [{ type: 'paragraph', content: [{ type: 'text', text }] }] });
 const source = (itemId: string): Source => ({ product: 'jira', kind: 'comment', containerId: '10001', containerKey: 'LEO-4', title: 'Vendor MSA', itemId, url: 'https://x/browse/LEO-4' });
@@ -100,6 +102,48 @@ describe('ingest', () => {
     const reply = await ingest({ source: source('reply'), doc: doc('Sent the redlines.'), authorId: 'acc', writtenAt: new Date(later), now: later });
     expect(reply.settled).toBe(0);
     expect([...db.values()]).toMatchObject([{ status: 'open', source: { product: 'confluence' } }]);
+  });
+
+  it.each([
+    [Date.UTC(2026, 10, 27, 12), 100],
+    [Date.UTC(2026, 10, 28, 12), 0],
+  ])('uses the original reply time for backfilled on-time totals', async (repliedAt, keptOnTime) => {
+    const now = Date.UTC(2026, 10, 30, 12);
+    const scanReply = () => ingest({
+      source: source('reply'), doc: doc('Sent the redlines.'), authorId: 'acc',
+      writtenAt: new Date(repliedAt), now, backfill: true,
+    });
+    await ingest({
+      source: source('promise'), doc: doc("I'll send the redlines by Friday"), authorId: 'acc',
+      writtenAt: new Date(at), now, backfill: true,
+    });
+
+    expect((await scanReply()).settled).toBe(1);
+    expect((await scanReply()).settled).toBe(0);
+    expect(stats([...db.values()], now).keptOnTime).toBe(keptOnTime);
+    expect([...db.values()]).toMatchObject([{ status: 'kept', updatedAt: now, history: [
+      { at: now, what: 'Promise found' }, { at: repliedAt, what: expect.stringContaining('Kept') },
+    ] }]);
+  });
+
+  it.each([
+    { updated: '2026-11-28T12:00:00Z', keptOnTime: 0 },
+    { updated: undefined, keptOnTime: 100 },
+    { updated: 'invalid', keptOnTime: 100 },
+  ])('uses the current Jira reply revision when available ($updated)', async ({ updated, keptOnTime }) => {
+    const now = Date.UTC(2026, 10, 30, 12);
+    const issue = { id: '10001', key: 'LEO-4', summary: 'Vendor MSA' };
+    const author = { accountId: 'acc' };
+
+    // The edited promise keeps the deadline relative to the original comment date.
+    await ingestJiraComment(issue, {
+      id: 'promise', body: doc("I'll send the redlines tomorrow"), author,
+      created: '2026-11-24T09:00:00Z', updated: '2026-11-27T12:00:00Z',
+    }, now, true);
+    const reply = { id: 'reply', body: doc('Sent the redlines.'), author, created: '2026-11-25T12:00:00Z', ...(updated ? { updated } : {}) };
+    expect((await ingestJiraComment(issue, reply, now, true)).settled).toBe(1);
+    expect([...db.values()]).toMatchObject([{ due: { day: '2026-11-25' }, status: 'kept', updatedAt: now }]);
+    expect(stats([...db.values()], now).keptOnTime).toBe(keptOnTime);
   });
 
   it('never brings back text marked not a promise', async () => {

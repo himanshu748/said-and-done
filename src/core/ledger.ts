@@ -77,8 +77,9 @@ export function fromCandidate(c: PromiseCandidate, ctx: { source: Source; author
 }
 
 const MAX_HISTORY = 20;
-export function withEvent(f: FollowUp, patch: Partial<FollowUp>, what: string, now: number): FollowUp {
-  return { ...f, ...patch, updatedAt: now, history: [...f.history, { at: now, what }].slice(-MAX_HISTORY) };
+/** Keep the time a source event happened separate from the time it was recorded. */
+export function withEvent(f: FollowUp, patch: Partial<FollowUp>, what: string, now: number, eventAt = now): FollowUp {
+  return { ...f, ...patch, updatedAt: now, history: [...f.history, { at: eventAt, what }].slice(-MAX_HISTORY) };
 }
 
 /** Re-detected text keeps the record and its status; only wording and date move. */
