@@ -88,6 +88,12 @@ button { font: inherit; color: inherit; }
 
 /* Toolbar */
 .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; position: sticky; top: 0; z-index: 2; padding: 8px 0; background: color-mix(in srgb, var(--paper) 88%, transparent); backdrop-filter: blur(8px); }
+.handoff { margin: -8px 0 18px; }
+.handoff__draft { display: grid; gap: 8px; padding: 14px; margin-top: 10px; border: 1px solid var(--line); border-radius: 12px; }
+.handoff__draft label { font-weight: 700; }
+.handoff__draft p { margin: 0; color: var(--ink-3); font-size: 13px; }
+.handoff__draft textarea { box-sizing: border-box; width: 100%; padding: 10px; background: var(--paper); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; resize: vertical; }
+.handoff__actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .tabs { display: flex; gap: 4px; background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 4px; overflow-x: auto; max-width: 100%; }
 .tab { border: 0; background: none; padding: 6px 12px; border-radius: 999px; font-weight: 600; font-size: 13px; color: var(--ink-2); cursor: pointer; display: inline-flex; gap: 6px; align-items: center; white-space: nowrap; transition: background 0.2s, color 0.2s; }
 .tab[aria-selected='true'] { background: var(--ink); color: var(--paper); }

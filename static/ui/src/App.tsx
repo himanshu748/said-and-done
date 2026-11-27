@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { stats, timing, type FollowUp, type Status, type Timing } from '@core/ledger';
 import { formatDay } from '@core/reminder';
-import { dismiss, getContext, loadLedger, open, scan, setDue, setStatus, type Ledger } from './bridge';
+import { dismiss, getContext, loadLedger, open, scan, setDue, setStatus, type Context, type Ledger } from './bridge';
+import { Handoff } from './Handoff';
 
 type Filter = 'live' | 'mine' | 'overdue' | 'kept' | 'dropped' | 'all';
 
@@ -18,7 +19,7 @@ const counted = (items: FollowUp[]) => items.filter((f) => !f.dismissed);
 const SCAN_IN_PROGRESS = 'Reading the last 30 days…';
 
 export function App() {
-  const [mode, setMode] = useState<'ledger' | 'panel' | null>(null);
+  const [context, setContext] = useState<Context | null>(null);
   const [data, setData] = useState<Ledger | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [scanning, setScanning] = useState<string | null>(null);
@@ -42,7 +43,7 @@ export function App() {
       const c = await getContext();
       const ledger = await loadLedger();
       if (attempt !== startupAttempt.current) return;
-      setMode(c.moduleKey.endsWith('ledger') ? 'ledger' : 'panel');
+      setContext(c);
       setData(ledger);
     } catch (e) {
       if (attempt === startupAttempt.current) setError(e instanceof Error ? e.message : String(e));
@@ -81,9 +82,9 @@ export function App() {
       <button className="btn btn--primary" type="button" onClick={() => { void start(); }}>Try again</button>
     </div>
   );
-  if (!shownData || !mode) return <Loading />;
-  return mode === 'ledger' ? (
-    <LedgerView data={shownData} onChange={replace} onScan={onScan} scanning={scanning} error={error} />
+  if (!shownData || !context) return <Loading />;
+  return context.moduleKey.endsWith('ledger') ? (
+    <LedgerView data={shownData} siteUrl={context.siteUrl} onChange={replace} onScan={onScan} scanning={scanning} error={error} />
   ) : (
     <PanelView data={shownData} onChange={replace} />
   );
@@ -99,7 +100,7 @@ function Loading() {
   );
 }
 
-function LedgerView({ data, onChange, onScan, scanning, error }: { data: Ledger; onChange: (f: FollowUp) => void; onScan: () => void; scanning: string | null; error: string | null }) {
+function LedgerView({ data, siteUrl, onChange, onScan, scanning, error }: { data: Ledger; siteUrl: string | undefined; onChange: (f: FollowUp) => void; onScan: () => void; scanning: string | null; error: string | null }) {
   const [filter, setFilter] = useState<Filter>('live');
   const [query, setQuery] = useState('');
   const now = data.now;
@@ -178,6 +179,7 @@ function LedgerView({ data, onChange, onScan, scanning, error }: { data: Ledger;
               <input type="search" placeholder="Search people, issues, words" value={query} onChange={(e) => setQuery(e.target.value)} />
             </label>
           </div>
+          <Handoff items={counted(shown).filter(live)} siteUrl={siteUrl} now={now} />
           <Timeline items={shown} now={now} onChange={onChange} grouped={filter === 'live' || filter === 'mine' || filter === 'overdue'} />
         </>
       )}

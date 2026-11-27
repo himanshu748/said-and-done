@@ -79,6 +79,42 @@ test('mine shows only the viewer\'s promises', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'share the final banner set' })).toHaveCount(0);
 });
 
+test('creates a shareable handoff from the open promises matching the current filters', async ({ page, context }) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  await page.goto('/');
+  await page.getByRole('tab', { name: /Overdue/ }).click();
+  const initialCalls = await page.evaluate(() => window.__sdCalls?.map(({ name }) => name));
+  await page.getByRole('button', { name: 'Prepare handoff' }).click();
+  const draft = page.getByRole('textbox', { name: 'Handoff draft' });
+  const text = await draft.inputValue();
+  expect(text).toContain('Legal lead: send the redlined MSA (overdue 2026-11-24)');
+  expect(text).toContain('https://example.atlassian.net/browse/LEO-4');
+  expect(text).not.toContain('share the final banner set');
+  expect(text).not.toContain('file the signed NDA');
+  await page.getByRole('button', { name: 'Copy draft' }).click();
+  await expect(page.getByText('Copied to clipboard.')).toBeVisible();
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(text);
+  expect(await page.evaluate(() => window.__sdCalls?.map(({ name }) => name))).toEqual(initialCalls);
+
+  await page.getByRole('tab', { name: /^Kept/ }).click();
+  await expect(page.getByRole('button', { name: 'Refresh handoff draft' })).toBeDisabled();
+  await page.getByRole('button', { name: 'Close draft' }).click();
+  await expect(draft).toHaveCount(0);
+});
+
+test('selects the handoff text if the clipboard is blocked', async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText: () => Promise.reject(new Error('Clipboard blocked')) } });
+  });
+  await page.goto('/?module=confluence-ledger');
+  await page.getByRole('button', { name: 'Prepare handoff' }).click();
+  await page.getByRole('button', { name: 'Copy draft' }).click();
+  await expect(page.getByText('Text selected. Use your device’s copy command.')).toBeVisible();
+  const draft = page.getByRole('textbox', { name: 'Handoff draft' });
+  await expect(draft).toBeFocused();
+  expect(await draft.evaluate((el: HTMLTextAreaElement) => el.selectionEnd - el.selectionStart)).toBe((await draft.inputValue()).length);
+});
+
 test('not a promise hides a card with undo', async ({ page }) => {
   await page.goto('/');
   const open = page.getByRole('tab', { name: /^Open/ });

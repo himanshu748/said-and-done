@@ -99,7 +99,7 @@ export async function invoke(name: string, payload?: Record<string, unknown>): P
 export const view = {
   getContext: async () => {
     if (params.get('startupError') === 'context' && !window.__sdAllowStartup) throw new Error('Could not load the Atlassian context');
-    return { moduleKey, extension: {} };
+    return { moduleKey, extension: {}, siteUrl: 'https://example.atlassian.net' };
   },
   theme: {
     enable: async () => {
