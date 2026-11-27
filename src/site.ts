@@ -16,6 +16,7 @@ async function json<T>(res: { ok: boolean; status: number; json: () => Promise<u
 export interface SiteUser extends Person {
   timeZone: string;
   isApp: boolean;
+  lookupIncomplete?: true;
 }
 
 export async function getUser(product: Product, accountId: string): Promise<SiteUser> {
@@ -27,7 +28,7 @@ export async function getUser(product: Product, accountId: string): Promise<Site
     const u = await json<{ displayName?: string; publicName?: string; timeZone?: string; accountType?: string }>(res, 'user');
     return { accountId, name: u.displayName ?? u.publicName ?? 'Someone', timeZone: u.timeZone ?? 'UTC', isApp: u.accountType === 'app' };
   } catch {
-    return { accountId, name: 'Someone', timeZone: 'UTC', isApp: false };
+    return { accountId, name: 'Someone', timeZone: 'UTC', isApp: false, lookupIncomplete: true };
   }
 }
 

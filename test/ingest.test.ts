@@ -8,10 +8,11 @@ vi.mock('../src/store', () => ({
   listForContainer: async (product: Source['product'], c: string) => [...db.values()].filter((f) => f.source.product === product && f.source.containerId === c),
 }));
 vi.mock('../src/site', () => ({
-  getUser: async (_p: string, accountId: string) => ({ accountId, name: 'Sam', timeZone: 'UTC', isApp: false }),
+  getUser: vi.fn(async (_p: string, accountId: string) => ({ accountId, name: 'Sam', timeZone: 'UTC', isApp: false })),
 }));
 
 const { ingest } = await import('../src/ingest');
+const { getUser } = await import('../src/site');
 
 const doc = (text: string) => ({ type: 'doc', version: 1, content: [{ type: 'paragraph', content: [{ type: 'text', text }] }] });
 const source = (itemId: string): Source => ({ product: 'jira', kind: 'comment', containerId: '10001', containerKey: 'LEO-4', title: 'Vendor MSA', itemId, url: 'https://x/browse/LEO-4' });
@@ -19,6 +20,20 @@ const at = Date.UTC(2026, 10, 24, 9);
 
 describe('ingest', () => {
   beforeEach(() => db.clear());
+
+  it('looks up the author again after a temporary profile failure', async () => {
+    const authorId = 'profile-retry';
+    vi.mocked(getUser)
+      .mockResolvedValueOnce({ accountId: authorId, name: 'Someone', timeZone: 'UTC', isApp: false, lookupIncomplete: true })
+      .mockResolvedValueOnce({ accountId: authorId, name: 'Priya', timeZone: 'Asia/Kolkata', isApp: false });
+    const args = { doc: doc("I'll send the redlines by Friday"), authorId, writtenAt: new Date(at), now: at };
+
+    await ingest({ ...args, source: source('retry-first') });
+    await ingest({ ...args, source: source('retry-second') });
+    await ingest({ ...args, source: source('retry-third') });
+
+    expect([...db.values()].map((record) => record.owner.name)).toEqual(['Someone', 'Priya', 'Priya']);
+  });
 
   it('only settles promises from the same product when container IDs match', async () => {
     const page: Source = { ...source('p1'), product: 'confluence', kind: 'page' };

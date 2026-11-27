@@ -22,7 +22,10 @@ function user(product: Product, accountId: string): Promise<SiteUser> {
   const k = `${product}:${accountId}`;
   let u = users.get(k);
   if (!u) {
-    u = getUser(product, accountId);
+    u = getUser(product, accountId).then((profile) => {
+      if (profile.lookupIncomplete) users.delete(k);
+      return profile;
+    });
     users.set(k, u);
   }
   return u;
