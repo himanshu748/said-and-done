@@ -35,6 +35,31 @@ describe('ingest', () => {
     expect([...db.values()].map((record) => record.owner.name)).toEqual(['Someone', 'Priya', 'Priya']);
   });
 
+  it('uses the mentioned name when its profile lookup fails and repairs a stored fallback', async () => {
+    const ownerId = 'owner-mention';
+    const fallback = { accountId: ownerId, name: 'Someone', timeZone: 'UTC', isApp: false, lookupIncomplete: true } as const;
+    vi.mocked(getUser)
+      .mockResolvedValueOnce({ accountId: 'mention-author', name: 'Sam', timeZone: 'UTC', isApp: false })
+      .mockResolvedValueOnce(fallback)
+      .mockResolvedValueOnce(fallback);
+    const mention = {
+      type: 'doc', version: 1, content: [{ type: 'paragraph', content: [
+        { type: 'mention', attrs: { id: ownerId, text: '@Priya Shah' } },
+        { type: 'text', text: ' will send the redlines by Friday' },
+      ] }],
+    };
+    const args = { source: source('mention'), doc: mention, authorId: 'mention-author', writtenAt: new Date(at), now: at };
+
+    await ingest(args);
+    const [record] = [...db.values()];
+    if (!record) throw new Error('not saved');
+    expect(record.owner).toEqual({ accountId: ownerId, name: 'Priya Shah' });
+
+    db.set(record.id, { ...record, owner: { accountId: ownerId, name: 'Someone' }, status: 'kept' });
+    expect((await ingest({ ...args, now: at + 1000 })).found).toBe(0);
+    expect([...db.values()]).toEqual([{ ...record, status: 'kept' }]);
+  });
+
   it('repairs a stored comment link on rescan without changing the record history', async () => {
     const comment: Source = {
       ...source('456'),

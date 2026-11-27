@@ -72,7 +72,12 @@ export async function ingest(args: { source: Source; doc: unknown; authorId: str
   const seen = new Set<string>();
   for (const c of detectPromises(blocks, writtenOn)) {
     seen.add(c.fingerprint);
-    const owner = c.owner.kind === 'author' ? authorPerson : { accountId: c.owner.accountId, name: (await user(product, c.owner.accountId)).name || c.owner.name };
+    let owner = authorPerson;
+    if (c.owner.kind === 'mention') {
+      const profile = await user(product, c.owner.accountId);
+      const name = profile.lookupIncomplete ? c.owner.name || profile.name : profile.name || c.owner.name;
+      owner = { accountId: c.owner.accountId, name };
+    }
     const next = fromCandidate(c, { source, author: authorPerson, owner, timeZone: author.timeZone, now });
     next.writtenAt = writtenAt;
     if (args.backfill && next.due && next.due.at < now) next.nudges = ['before', 'overdue'];
@@ -90,6 +95,9 @@ export async function ingest(args: { source: Source; doc: unknown; authorId: str
     const base = prev?.dismissed ? undefined : prev?.removed ? withEvent(prev, { status: 'open', removed: false, writtenAt }, 'Reopened — back on the page', now) : prev;
     // A reply that already settled the old text must not be reread against another promise.
     let save = base ? refresh(base, next, now) : prev?.settledBy ? { ...next, settledBy: prev.settledBy } : next;
+    if (c.owner.kind === 'mention' && save.owner.accountId === owner.accountId && save.owner.name === 'Someone' && owner.name !== 'Someone') {
+      save = { ...save, owner };
+    }
     if (source.kind === 'page-comment' && save.source.url !== source.url) save = { ...save, source: { ...save.source, url: source.url } };
     if (isPage && save.pageSnapshotAt !== writtenAt) save = { ...save, pageSnapshotAt: writtenAt };
     if (save !== prev) await saveFollowUp(save);
