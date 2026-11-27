@@ -28,7 +28,7 @@ export const loadLedger = (): Promise<Ledger> => invoke<Ledger>('list');
 export const setStatus = (id: string, status: Status): Promise<FollowUp> => invoke<FollowUp>('setStatus', { id, status });
 export const setDue = (id: string, day: string | null): Promise<FollowUp> => invoke<FollowUp>('setDue', { id, day });
 export const dismiss = (id: string, dismissed: boolean): Promise<FollowUp> => invoke<FollowUp>('dismiss', { id, dismissed });
-export const scan = (): Promise<{ scanned: number; found: number }> => invoke('scan');
+export const scan = (): Promise<{ scanned: number; found: number; partial?: boolean }> => invoke('scan');
 export const open = (url: string): void => {
   void router.navigate(url);
 };

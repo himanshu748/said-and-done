@@ -91,7 +91,7 @@ export async function invoke(name: string, payload?: Record<string, unknown>): P
   }
   if (name === 'scan') {
     items = [...items, item('9', 'send the onboarding pack', "I'll send the onboarding pack by Dec 3", 8)];
-    return { scanned: 12, found: 1 };
+    return { scanned: 12, found: 1, partial: params.get('partialScan') === '1' };
   }
   throw new Error(`unknown ${name}`);
 }

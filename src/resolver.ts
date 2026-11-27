@@ -84,27 +84,40 @@ resolver.define('scan', async ({ context }) => {
   const now = Date.now();
   let scanned = 0;
   let found = 0;
+  let partial = false;
   const deadline = now + 20_000;
+  const timedOut = () => {
+    if (Date.now() <= deadline) return false;
+    partial = true;
+    return true;
+  };
   if (productOf(ctx) === 'jira') {
     for (const issue of await searchRecentIssues('user', 30, 40)) {
+      if (timedOut()) break;
       for (const c of issue.fields.comment?.comments ?? []) {
-        if (Date.now() > deadline) break;
+        if (timedOut()) break;
         found += (await ingestJiraComment({ id: issue.id, key: issue.key, summary: issue.fields.summary }, c, now, true)).found;
         scanned++;
       }
     }
   } else {
     for (const p of await recentPages('user', 25)) {
-      if (Date.now() > deadline) break;
+      if (timedOut()) break;
       found += (await ingestPage(p, now, true)).found;
       scanned++;
-      for (const c of await pageComments('user', p.id).catch(() => [])) {
+      if (timedOut()) break;
+      const comments = await pageComments('user', p.id).catch(() => {
+        partial = true;
+        return [];
+      });
+      for (const c of comments) {
+        if (timedOut()) break;
         found += (await ingestPageComment(c, now, p, true)).found;
         scanned++;
       }
     }
   }
-  return { scanned, found };
+  return { scanned, found, partial };
 });
 
 export const handler = resolver.getDefinitions();
