@@ -36,18 +36,22 @@ export async function sendReminders(): Promise<void> {
   const now = Date.now();
   const all = await listFollowUps();
   let sent = 0;
-  for (const f of all) {
-    const kind = nudgeDue(f, now);
-    if (!kind) continue;
+  for (const listed of all) {
+    if (!nudgeDue(listed, now)) continue;
     try {
+      // The list may be old by the time earlier reminders have been posted.
+      const f = await getFollowUp(listed.id);
+      if (!f) continue;
+      const kind = nudgeDue(f, now);
+      if (!kind) continue;
       if (f.source.product === 'jira') await addJiraComment(f.source.containerId, reminderDoc(f, kind));
       else await addPageComment(f.source.containerId, reminderDoc(f, kind));
-      const cur = (await getFollowUp(f.id)) ?? f;
-      if (cur.due?.day !== f.due?.day) continue;
+      const cur = await getFollowUp(f.id);
+      if (!cur || cur.due?.day !== f.due?.day || cur.due?.at !== f.due?.at || cur.nudges.includes(kind)) continue;
       await saveFollowUp(withEvent(cur, { nudges: [...cur.nudges, kind] }, kind === 'overdue' ? 'Overdue reminder posted' : 'Reminder posted', now));
       sent++;
     } catch (e) {
-      console.error(`reminder ${f.id} failed`, e);
+      console.error(`reminder ${listed.id} failed`, e);
     }
   }
   console.log(`reminders: ${all.length} follow-ups checked, ${sent} posted`);
