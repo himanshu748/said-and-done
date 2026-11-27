@@ -34,8 +34,13 @@ export function adfToBlocks(doc: unknown): Block[] {
     cur ??= { text: '', mentions: [], dates: [] };
     return cur;
   };
+  const append = (text: string): void => {
+    const block = open();
+    const normalized = text.replace(/[ \t]+/g, ' ');
+    block.text += block.text.endsWith(' ') && normalized.startsWith(' ') ? normalized.slice(1) : normalized;
+  };
   const close = (): void => {
-    if (cur && cur.text.trim()) blocks.push({ ...cur, text: cur.text.replace(/[ \t]+/g, ' ') });
+    if (cur && cur.text.trim()) blocks.push(cur);
     cur = null;
   };
 
@@ -53,7 +58,7 @@ export function adfToBlocks(doc: unknown): Block[] {
     }
     if (type === 'text') {
       const marks = (node as { marks?: { type: string }[] }).marks ?? [];
-      if (!marks.some((m) => m.type === 'code')) open().text += node.text ?? '';
+      if (!marks.some((m) => m.type === 'code')) append(node.text ?? '');
       return;
     }
     if (type === 'hardBreak') {
@@ -65,7 +70,7 @@ export function adfToBlocks(doc: unknown): Block[] {
       const raw = String(node.attrs?.['text'] ?? '@someone');
       const label = raw.startsWith('@') ? raw : `@${raw}`;
       const start = b.text.length;
-      b.text += label;
+      append(label);
       b.mentions.push({ accountId: String(node.attrs?.['id'] ?? ''), name: label.slice(1), start, end: b.text.length });
       return;
     }
@@ -80,7 +85,7 @@ export function adfToBlocks(doc: unknown): Block[] {
       return;
     }
     if (type === 'emoji') {
-      open().text += String(node.attrs?.['text'] ?? '');
+      append(String(node.attrs?.['text'] ?? ''));
       return;
     }
     const isBlock = BLOCK_TYPES.has(type) || type === 'listItem';
