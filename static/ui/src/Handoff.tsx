@@ -33,6 +33,12 @@ export function Handoff({ items, now, siteUrl }: { items: FollowUp[]; now: numbe
   const [notice, setNotice] = useState('');
   const text = useRef<HTMLTextAreaElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
+  const stale = draft !== null && (!items.length || draft !== handoffText(items, now, siteUrl));
+
+  let message = notice;
+  if (stale) {
+    message = items.length ? 'Refresh the draft to copy the current handoff.' : 'No open promises match your filters.';
+  }
 
   const prepare = () => {
     setDraft(handoffText(items, now, siteUrl));
@@ -45,7 +51,7 @@ export function Handoff({ items, now, siteUrl }: { items: FollowUp[]; now: numbe
   };
 
   const copy = async () => {
-    if (!draft) return;
+    if (!draft || stale) return;
     try {
       await navigator.clipboard.writeText(draft);
       setNotice('Copied to clipboard.');
@@ -67,10 +73,10 @@ export function Handoff({ items, now, siteUrl }: { items: FollowUp[]; now: numbe
           <p>Snapshot of the open promises matching your filters when you prepared it.</p>
           <textarea id="handoff-text" ref={text} value={draft} readOnly rows={7} />
           <div className="handoff__actions">
-            <button type="button" className="btn btn--primary" onClick={() => void copy()}>Copy draft</button>
+            <button type="button" className="btn btn--primary" onClick={() => void copy()} disabled={stale}>Copy draft</button>
             <button type="button" className="btn btn--ghost" onClick={close}>Close draft</button>
           </div>
-          <p role="status">{notice}</p>
+          <p role="status">{message}</p>
         </div>
       )}
     </section>
