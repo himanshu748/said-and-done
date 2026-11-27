@@ -7,14 +7,19 @@ export function jiraSource(issue: { id: string; key: string; summary: string }, 
   return { product: 'jira', kind: 'comment', containerId: issue.id, containerKey: issue.key, title: issue.summary, itemId: commentId, url: `/browse/${issue.key}?focusedCommentId=${commentId}` };
 }
 
-export function ingestJiraComment(issue: { id: string; key: string; summary: string }, c: JiraComment, now: number, backfill = false): Promise<IngestResult> {
+export function jiraCommentRevisionAt(c: JiraComment): number {
+  const writtenAt = Date.parse(c.created);
+  const revisionAt = Date.parse(c.updated ?? '');
+  return revisionAt >= writtenAt ? revisionAt : writtenAt;
+}
+
+export function ingestJiraComment(issue: { id: string; key: string; summary: string }, c: JiraComment, now: number, backfill = false, options: { settlementOnly?: boolean } = {}): Promise<IngestResult> {
   // Restricted comments stay private: tracking them would quote them in the ledger and in public reminders.
   if ((c as { visibility?: unknown }).visibility) return Promise.resolve({ found: 0, settled: 0 });
   const writtenAt = new Date(c.created);
-  const revisionAt = Date.parse(c.updated ?? '');
   // The current body can signal completion only as of its current revision.
-  const replyAt = revisionAt >= writtenAt.getTime() ? revisionAt : writtenAt.getTime();
-  return ingest({ source: jiraSource(issue, c.id), doc: c.body, authorId: c.author?.accountId ?? '', writtenAt, replyAt, now, backfill });
+  const replyAt = jiraCommentRevisionAt(c);
+  return ingest({ source: jiraSource(issue, c.id), doc: c.body, authorId: c.author?.accountId ?? '', writtenAt, replyAt, now, backfill, ...options });
 }
 
 const spaceKeys = new Map<string, Promise<string>>();

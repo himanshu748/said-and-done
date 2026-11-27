@@ -2,7 +2,7 @@
 import { adfToBlocks, type Block } from './core/adf';
 import { dayInZone } from './core/dates';
 import { detectPromises } from './core/detect';
-import { pickPromise, readSignal } from './core/followup';
+import { overlap, pickPromise, readSignal } from './core/followup';
 import { fromCandidate, refresh, withEvent, type FollowUp, type Source } from './core/ledger';
 import { MARKER } from './core/reminder';
 import { getUser, type Product, type SiteUser } from './site';
@@ -31,7 +31,7 @@ function user(product: Product, accountId: string): Promise<SiteUser> {
   return u;
 }
 
-export async function ingest(args: { source: Source; doc: unknown; authorId: string; writtenAt: Date; replyAt?: number; now: number; backfill?: boolean }): Promise<IngestResult> {
+export async function ingest(args: { source: Source; doc: unknown; authorId: string; writtenAt: Date; replyAt?: number; now: number; backfill?: boolean; settlementOnly?: boolean }): Promise<IngestResult> {
   const { source, now } = args;
   const product = source.product;
   const isPage = source.kind === 'page';
@@ -62,13 +62,15 @@ export async function ingest(args: { source: Source; doc: unknown; authorId: str
       );
       const hit = pickPromise(open, text);
       // A reply about text marked not a promise settles nothing else.
-      if (hit && !hit.dismissed) {
+      // Older edits must also mention some of the promised action.
+      if (hit && !hit.dismissed && (!args.settlementOnly || overlap(hit.action, text) > 0)) {
         await saveFollowUp(withEvent(hit, { status: signal === 'done' ? 'kept' : 'slipping', settledBy: source.itemId }, signal === 'done' ? `Kept — ${author.name} replied` : `Slipping — ${author.name} asked for more time`, now, replyAt));
         result.settled++;
       }
     }
   }
 
+  if (args.settlementOnly) return result;
   const seen = new Set<string>();
   for (const c of detectPromises(blocks, writtenOn)) {
     seen.add(c.fingerprint);
