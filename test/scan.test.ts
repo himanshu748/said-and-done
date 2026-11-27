@@ -1,8 +1,11 @@
 import { expect, it, vi } from 'vitest';
 
-const { handlers, pageComments, ingestPage, ingestPageComment } = vi.hoisted(() => ({
+const { handlers, searchRecentIssues, recentPages, pageComments, ingestJiraComment, ingestPage, ingestPageComment } = vi.hoisted(() => ({
   handlers: {} as Record<string, (params: { context: { moduleKey: string } }) => Promise<unknown>>,
+  searchRecentIssues: vi.fn(),
+  recentPages: vi.fn(),
   pageComments: vi.fn(),
+  ingestJiraComment: vi.fn(),
   ingestPage: vi.fn(),
   ingestPageComment: vi.fn(),
 }));
@@ -15,18 +18,40 @@ vi.mock('@forge/resolver', () => ({
 }));
 
 vi.mock('../src/site', () => ({
-  recentPages: async () => [{ id: 'first' }, { id: 'second' }],
+  recentPages,
+  searchRecentIssues,
   pageComments,
 }));
-vi.mock('../src/sources', () => ({ ingestPage, ingestPageComment }));
+vi.mock('../src/sources', () => ({ ingestJiraComment, ingestPage, ingestPageComment }));
 vi.mock('../src/store', () => ({}));
 
 await import('../src/resolver');
 
+it('imports only Jira comments in the advertised scan window', async () => {
+  const scan = handlers.scan;
+  if (!scan) throw new Error('Scan resolver was not registered');
+  const clock = vi.spyOn(Date, 'now').mockReturnValue(Date.parse('2026-11-27T12:00:00Z'));
+  const recent = { id: 'recent', created: '2026-10-28T12:00:00Z' };
+  searchRecentIssues.mockResolvedValue([{ id: '12', key: 'APP-1', fields: { summary: 'Draft', comment: { comments: [
+    { id: 'old', created: '2026-10-28T11:59:59Z' },
+    recent,
+    { id: 'invalid', created: 'unavailable' },
+  ] } } }]);
+  ingestJiraComment.mockResolvedValue({ found: 1 });
+  try {
+    expect(await scan({ context: { moduleKey: 'jira-ledger' } })).toEqual({ scanned: 1, found: 1, partial: true });
+    expect(ingestJiraComment).toHaveBeenCalledExactlyOnceWith({ id: '12', key: 'APP-1', summary: 'Draft' }, recent, Date.now(), true);
+  } finally {
+    clock.mockRestore();
+  }
+});
+
 it('keeps scanning other pages and reports partial results when comments cannot be read', async () => {
+  const recent = new Date(Date.now() - 60_000).toISOString();
+  recentPages.mockResolvedValue([{ id: 'first', createdAt: recent }, { id: 'second', createdAt: recent }]);
   ingestPage.mockResolvedValue({ found: 0 });
   ingestPageComment.mockResolvedValue({ found: 1 });
-  pageComments.mockRejectedValueOnce(new Error('comments unavailable')).mockResolvedValueOnce([{ id: 'visible' }]);
+  pageComments.mockRejectedValueOnce(new Error('comments unavailable')).mockResolvedValueOnce([{ id: 'visible', version: { createdAt: recent } }]);
 
   const scan = handlers.scan;
   if (!scan) throw new Error('Scan resolver was not registered');
@@ -34,4 +59,26 @@ it('keeps scanning other pages and reports partial results when comments cannot 
 
   expect(result).toMatchObject({ scanned: 3, found: 1, partial: true });
   expect(ingestPageComment).toHaveBeenCalledTimes(1);
+});
+
+it('ignores older Confluence snapshots while scanning their recent footer comments', async () => {
+  const scan = handlers.scan;
+  if (!scan) throw new Error('Scan resolver was not registered');
+  const clock = vi.spyOn(Date, 'now').mockReturnValue(Date.parse('2026-11-27T12:00:00Z'));
+  const old = '2026-10-27T12:00:00Z';
+  const recent = '2026-11-20T12:00:00Z';
+  const oldPage = { id: 'old-page', createdAt: old };
+  const edited = { id: 'edited-page', createdAt: old, version: { createdAt: recent } };
+  const newComment = { id: 'recent-comment', version: { createdAt: recent } };
+  recentPages.mockResolvedValue([oldPage, edited]);
+  pageComments.mockResolvedValueOnce([{ id: 'old-comment', version: { createdAt: old } }, newComment]).mockResolvedValueOnce([]);
+  ingestPage.mockClear().mockResolvedValue({ found: 1 });
+  ingestPageComment.mockClear().mockResolvedValue({ found: 1 });
+  try {
+    expect(await scan({ context: { moduleKey: 'confluence-ledger' } })).toEqual({ scanned: 2, found: 2, partial: false });
+    expect(ingestPage).toHaveBeenCalledExactlyOnceWith(edited, Date.now(), true);
+    expect(ingestPageComment).toHaveBeenCalledExactlyOnceWith(newComment, Date.now(), oldPage, true);
+  } finally {
+    clock.mockRestore();
+  }
 });
