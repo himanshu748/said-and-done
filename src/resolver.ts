@@ -1,6 +1,6 @@
 import Resolver from '@forge/resolver';
 import { sortForLedger, stats, withEvent, type FollowUp, type Status } from './core/ledger';
-import { endOfDayInZone } from './core/dates';
+import { endOfDayInZone, isCalendarDay } from './core/dates';
 import { recentPages, pageComments, searchRecentIssues, visibleIssueIds, visiblePageIds, getUser, type Product } from './site';
 import { ingestJiraComment, ingestPage, ingestPageComment } from './sources';
 import { getFollowUp, listFollowUps, listForContainer, saveFollowUp } from './store';
@@ -58,7 +58,7 @@ resolver.define('setStatus', async ({ payload, context }) => {
 
 resolver.define('setDue', async ({ payload, context }) => {
   const { id, day } = payload as { id: string; day: string | null };
-  if (day !== null && !/^\d{4}-\d{2}-\d{2}$/.test(day)) throw new Error('Use a YYYY-MM-DD date');
+  if (day !== null && !isCalendarDay(day)) throw new Error('Use a valid YYYY-MM-DD date');
   const ctx = context as Ctx;
   const f = await editable(ctx, id);
   const tz = ctx.accountId ? (await getUser(productOf(ctx), ctx.accountId)).timeZone : 'UTC';
