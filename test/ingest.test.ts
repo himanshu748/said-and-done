@@ -146,6 +146,25 @@ describe('ingest', () => {
     expect(stats([...db.values()], now).keptOnTime).toBe(keptOnTime);
   });
 
+  it('settles from an older Jira comment edited during the scan without importing its promises', async () => {
+    const now = Date.UTC(2026, 10, 30, 12);
+    const issue = { id: '10001', key: 'LEO-4', summary: 'Vendor MSA' };
+    const author = { accountId: 'acc' };
+    await ingestJiraComment(issue, {
+      id: 'promise', body: doc("I'll send the redlines by Friday"), author, created: '2026-11-24T09:00:00Z',
+    }, now, true);
+
+    const reply = {
+      id: 'reply', body: doc("Sent the redlines. I'll file the binder by Friday."), author,
+      created: '2026-10-01T12:00:00Z', updated: '2026-11-27T12:00:00Z',
+    };
+    expect(await ingestJiraComment(issue, reply, now, true, { settlementOnly: true })).toEqual({ found: 0, settled: 1 });
+    expect([...db.values()]).toMatchObject([{ status: 'kept', updatedAt: now, history: [
+      { at: now, what: 'Promise found' },
+      { at: Date.parse(reply.updated), what: expect.stringContaining('Kept') },
+    ] }]);
+  });
+
   it('never brings back text marked not a promise', async () => {
     const args = { source: source('1'), doc: doc("I'll send the redlines by Friday"), authorId: 'acc', writtenAt: new Date(at), now: at };
     expect((await ingest(args)).found).toBe(1);

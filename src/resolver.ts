@@ -2,7 +2,7 @@ import Resolver from '@forge/resolver';
 import { sortForLedger, stats, withEvent, type FollowUp, type Status } from './core/ledger';
 import { endOfDayInZone, isCalendarDay } from './core/dates';
 import { recentPages, pageComments, searchRecentIssues, visibleIssueIds, visiblePageIds, getUser, type Product } from './site';
-import { ingestJiraComment, ingestPage, ingestPageComment } from './sources';
+import { ingestJiraComment, ingestPage, ingestPageComment, jiraCommentRevisionAt } from './sources';
 import { getFollowUp, listFollowUps, listForContainer, saveFollowUp } from './store';
 
 interface Ctx {
@@ -94,8 +94,8 @@ resolver.define('scan', async ({ context }) => {
     partial = true;
     return true;
   };
-  const inScanWindow = (stamp: string | undefined) => {
-    const time = Date.parse(stamp ?? '');
+  const inScanWindow = (stamp: string | number | undefined) => {
+    const time = typeof stamp === 'number' ? stamp : Date.parse(stamp ?? '');
     if (!Number.isFinite(time)) partial = true;
     return time >= since && time <= now;
   };
@@ -115,11 +115,21 @@ resolver.define('scan', async ({ context }) => {
       const comments = issue.fields.comment;
       if (!comments) continue;
       partial ||= (comments.total ?? 0) > comments.comments.length;
+      const sourceIssue = { id: issue.id, key: issue.key, summary: issue.fields.summary };
+      const edited: { comment: (typeof comments.comments)[number]; time: number }[] = [];
       for (const c of comments.comments) {
         if (timedOut()) break;
-        // An issue updated in the scan window can still contain older comments.
-        if (!inScanWindow(c.created)) continue;
-        await record(ingestJiraComment({ id: issue.id, key: issue.key, summary: issue.fields.summary }, c, now, true));
+        if (inScanWindow(c.created)) {
+          await record(ingestJiraComment(sourceIssue, c, now, true));
+        } else {
+          const time = jiraCommentRevisionAt(c);
+          if (inScanWindow(time)) edited.push({ comment: c, time });
+        }
+      }
+      // Register recent promises before letting older comments' edits settle them.
+      for (const { comment } of edited.sort((a, b) => a.time - b.time)) {
+        if (timedOut()) break;
+        await record(ingestJiraComment(sourceIssue, comment, now, true, { settlementOnly: true }));
       }
     }
   } else {

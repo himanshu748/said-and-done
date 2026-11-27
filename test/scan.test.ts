@@ -22,7 +22,10 @@ vi.mock('../src/site', () => ({
   searchRecentIssues,
   pageComments,
 }));
-vi.mock('../src/sources', () => ({ ingestJiraComment, ingestPage, ingestPageComment }));
+vi.mock(import('../src/sources'), async (importOriginal) => ({
+  ...await importOriginal(),
+  ingestJiraComment, ingestPage, ingestPageComment,
+}));
 vi.mock('../src/store', () => ({}));
 
 await import('../src/resolver');
@@ -41,6 +44,32 @@ it('imports only Jira comments in the advertised scan window', async () => {
   try {
     expect(await scan({ context: { moduleKey: 'jira-ledger' } })).toEqual({ scanned: 1, found: 1, partial: true });
     expect(ingestJiraComment).toHaveBeenCalledExactlyOnceWith({ id: '12', key: 'APP-1', summary: 'Draft' }, recent, Date.now(), true);
+  } finally {
+    clock.mockRestore();
+  }
+});
+
+it('checks recently edited older Jira comments only for settlement replies', async () => {
+  const scan = handlers.scan;
+  if (!scan) throw new Error('Scan resolver was not registered');
+  const now = Date.parse('2026-11-27T12:00:00Z');
+  const clock = vi.spyOn(Date, 'now').mockReturnValue(now);
+  const old = '2026-10-01T12:00:00Z';
+  const edited = { id: 'edited', created: old, updated: '2026-11-20T12:00:00Z' };
+  const promise = { id: 'recent-promise', created: '2026-11-19T12:00:00Z' };
+  searchRecentIssues.mockResolvedValue({ items: [{ id: '12', key: 'APP-1', fields: { summary: 'Draft', comment: { comments: [
+    { id: 'untouched', created: old },
+    edited,
+    { id: 'invalid-edit-date', created: old, updated: 'unavailable' },
+    promise,
+  ] } } }], more: false });
+  ingestJiraComment.mockClear().mockResolvedValueOnce({ found: 1, settled: 0 }).mockResolvedValueOnce({ found: 0, settled: 1 });
+  try {
+    const issue = { id: '12', key: 'APP-1', summary: 'Draft' };
+    expect(await scan({ context: { moduleKey: 'jira-ledger' } })).toEqual({ scanned: 2, found: 1, partial: false });
+    expect(ingestJiraComment).toHaveBeenCalledTimes(2);
+    expect(ingestJiraComment).toHaveBeenNthCalledWith(1, issue, promise, now, true);
+    expect(ingestJiraComment).toHaveBeenNthCalledWith(2, issue, edited, now, true, { settlementOnly: true });
   } finally {
     clock.mockRestore();
   }

@@ -31,7 +31,7 @@ function user(product: Product, accountId: string): Promise<SiteUser> {
   return u;
 }
 
-export async function ingest(args: { source: Source; doc: unknown; authorId: string; writtenAt: Date; replyAt?: number; now: number; backfill?: boolean }): Promise<IngestResult> {
+export async function ingest(args: { source: Source; doc: unknown; authorId: string; writtenAt: Date; replyAt?: number; now: number; backfill?: boolean; settlementOnly?: boolean }): Promise<IngestResult> {
   const { source, now } = args;
   const product = source.product;
   const isPage = source.kind === 'page';
@@ -69,6 +69,7 @@ export async function ingest(args: { source: Source; doc: unknown; authorId: str
     }
   }
 
+  if (args.settlementOnly) return result;
   const seen = new Set<string>();
   for (const c of detectPromises(blocks, writtenOn)) {
     seen.add(c.fingerprint);
