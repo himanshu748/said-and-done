@@ -72,12 +72,23 @@ export async function visibleIssueIds(ids: string[]): Promise<Set<string>> {
   for (let i = 0; i < ids.length; i += 100) {
     const part = ids.slice(i, i + 100).filter((x) => /^\d+$/.test(x));
     if (!part.length) continue;
-    const res = await api.asUser().requestJira(route`/rest/api/3/search/jql`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify({ jql: `id in (${part.join(',')})`, maxResults: 100, fields: ['id'] }),
-    });
-    for (const x of (await json<{ issues: { id: string }[] }>(res, 'visibility')).issues) out.add(x.id);
+    const jql = `id in (${part.join(',')})`;
+    const cursors = new Set<string>();
+    let nextPageToken: string | undefined;
+    do {
+      const res = await api.asUser().requestJira(route`/rest/api/3/search/jql`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ jql, maxResults: 100, fields: ['id'], nextPageToken }),
+      });
+      const page = await json<{ issues: { id: string }[]; nextPageToken?: string }>(res, 'visibility');
+      for (const x of page.issues) out.add(x.id);
+      nextPageToken = page.nextPageToken;
+      if (nextPageToken) {
+        if (cursors.has(nextPageToken)) throw new Error('Jira issue visibility pagination did not advance');
+        cursors.add(nextPageToken);
+      }
+    } while (nextPageToken);
   }
   return out;
 }
