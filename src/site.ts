@@ -169,8 +169,20 @@ export async function visiblePageIds(ids: string[]): Promise<Set<string>> {
   for (let i = 0; i < ids.length; i += 100) {
     const part = ids.slice(i, i + 100).filter((x) => /^\d+$/.test(x));
     if (!part.length) continue;
-    const res = await api.asUser().requestConfluence(route`/wiki/api/v2/pages?id=${part.join(',')}&limit=250`);
-    for (const p of (await json<{ results: { id: string }[] }>(res, 'visibility')).results) out.add(p.id);
+    const cursors = new Set<string>();
+    let cursor: string | null = null;
+    do {
+      const path = cursor
+        ? route`/wiki/api/v2/pages?id=${part.join(',')}&limit=250&cursor=${cursor}`
+        : route`/wiki/api/v2/pages?id=${part.join(',')}&limit=250`;
+      const res = await api.asUser().requestConfluence(path);
+      const page = await json<{ results: { id: string }[]; _links?: { next?: string } }>(res, 'visibility');
+      for (const p of page.results) out.add(p.id);
+      const next = page._links?.next;
+      cursor = next ? new URL(next, 'https://confluence.invalid').searchParams.get('cursor') : null;
+      if (next && (!cursor || cursors.has(cursor))) throw new Error('Confluence page visibility pagination did not advance');
+      if (cursor) cursors.add(cursor);
+    } while (cursor);
   }
   return out;
 }
