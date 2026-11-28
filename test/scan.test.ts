@@ -1,1 +1,157 @@
-aW1wb3J0IHsgZXhwZWN0LCBpdCwgdmkgfSBmcm9tICd2aXRlc3QnOwoKY29uc3QgeyBoYW5kbGVycywgc2VhcmNoUmVjZW50SXNzdWVzLCByZWNlbnRQYWdlcywgcGFnZUNvbW1lbnRzLCBpbmdlc3RKaXJhQ29tbWVudCwgaW5nZXN0UGFnZSwgaW5nZXN0UGFnZUNvbW1lbnQgfSA9IHZpLmhvaXN0ZWQoKCkgPT4gKHsKICBoYW5kbGVyczoge30gYXMgUmVjb3JkPHN0cmluZywgKHBhcmFtczogeyBjb250ZXh0OiB7IG1vZHVsZUtleTogc3RyaW5nIH0gfSkgPT4gUHJvbWlzZTx1bmtub3duPj4sCiAgc2VhcmNoUmVjZW50SXNzdWVzOiB2aS5mbigpLAogIHJlY2VudFBhZ2VzOiB2aS5mbigpLAogIHBhZ2VDb21tZW50czogdmkuZm4oKSwKICBpbmdlc3RKaXJhQ29tbWVudDogdmkuZm4oKSwKICBpbmdlc3RQYWdlOiB2aS5mbigpLAogIGluZ2VzdFBhZ2VDb21tZW50OiB2aS5mbigpLAp9KSk7Cgp2aS5tb2NrKCdAZm9yZ2UvcmVzb2x2ZXInLCAoKSA9PiAoewogIGRlZmF1bHQ6IGNsYXNzIHsKICAgIGRlZmluZShuYW1lOiBzdHJpbmcsIGZuOiAodHlwZW9mIGhhbmRsZXJzKVtzdHJpbmddKSB7IGhhbmRsZXJzW25hbWVdID0gZm47IH0KICAgIGdldERlZmluaXRpb25zKCkgeyByZXR1cm4gaGFuZGxlcnM7IH0KICB9LAp9KSk7Cgp2aS5tb2NrKCcuLi9zcmMvc2l0ZScsICgpID0+ICh7CiAgcmVjZW50UGFnZXMsCiAgc2VhcmNoUmVjZW50SXNzdWVzLAogIHBhZ2VDb21tZW50cywKfSkpOwp2aS5tb2NrKGltcG9ydCgnLi4vc3JjL3NvdXJjZXMnKSwgYXN5bmMgKGltcG9ydE9yaWdpbmFsKSA9PiAoewogIC4uLmF3YWl0IGltcG9ydE9yaWdpbmFsKCksCiAgaW5nZXN0SmlyYUNvbW1lbnQsIGluZ2VzdFBhZ2UsIGluZ2VzdFBhZ2VDb21tZW50LAp9KSk7CnZpLm1vY2soJy4uL3NyYy9zdG9yZScsICgpID0+ICh7fSkpOwoKYXdhaXQgaW1wb3J0KCcuLi9zcmMvcmVzb2x2ZXInKTsKCml0KCdpbXBvcnRzIG9ubHkgSmlyYSBjb21tZW50cyBpbiB0aGUgYWR2ZXJ0aXNlZCBzY2FuIHdpbmRvdycsIGFzeW5jICgpID0+IHsKICBjb25zdCBzY2FuID0gaGFuZGxlcnMuc2NhbjsKICBpZiAoIXNjYW4pIHRocm93IG5ldyBFcnJvcignU2NhbiByZXNvbHZlciB3YXMgbm90IHJlZ2lzdGVyZWQnKTsKICBjb25zdCBjbG9jayA9IHZpLnNweU9uKERhdGUsICdub3cnKS5tb2NrUmV0dXJuVmFsdWUoRGF0ZS5wYXJzZSgnMjAyNi0xMS0yN1QxMjowMDowMFonKSk7CiAgY29uc3QgcmVjZW50ID0geyBpZDogJ3JlY2VudCcsIGNyZWF0ZWQ6ICcyMDI2LTEwLTI4VDEyOjAwOjAwWicgfTsKICBzZWFyY2hSZWNlbnRJc3N1ZXMubW9ja1Jlc29sdmVkVmFsdWUoeyBpdGVtczogW3sgaWQ6ICcxMicsIGtleTogJ0FQUC0xJywgZmllbGRzOiB7IHN1bW1hcnk6ICdEcmFmdCcsIGNvbW1lbnQ6IHsgY29tbWVudHM6IFsKICAgIHsgaWQ6ICdvbGQnLCBjcmVhdGVkOiAnMjAyNi0xMC0yOFQxMTo1OTo1OVonIH0sCiAgICByZWNlbnQsCiAgICB7IGlkOiAnaW52YWxpZCcsIGNyZWF0ZWQ6ICd1bmF2YWlsYWJsZScgfSwKICBdIH0gfSB9XSwgbW9yZTogZmFsc2UgfSk7CiAgaW5nZXN0SmlyYUNvbW1lbnQubW9ja1Jlc29sdmVkVmFsdWUoeyBmb3VuZDogMSB9KTsKICB0cnkgewogICAgZXhwZWN0KGF3YWl0IHNjYW4oeyBjb250ZXh0OiB7IG1vZHVsZUtleTogJ2ppcmEtbGVkZ2VyJyB9IH0pKS50b0VxdWFsKHsgc2Nhbm5lZDogMSwgZm91bmQ6IDEsIHBhcnRpYWw6IHRydWUgfSk7CiAgICBleHBlY3QoaW5nZXN0SmlyYUNvbW1lbnQpLnRvSGF2ZUJlZW5DYWxsZWRFeGFjdGx5T25jZVdpdGgoeyBpZDogJzEyJywga2V5OiAnQVBQLTEnLCBzdW1tYXJ5OiAnRHJhZnQnIH0sIHJlY2VudCwgRGF0ZS5ub3coKSwgdHJ1ZSk7CiAgfSBmaW5hbGx5IHsKICAgIGNsb2NrLm1vY2tSZXN0b3JlKCk7CiAgfQp9KTsKCml0KCdjaGVja3MgcmVjZW50bHkgZWRpdGVkIG9sZGVyIEppcmEgY29tbWVudHMgb25seSBmb3Igc2V0dGxlbWVudCByZXBsaWVzJywgYXN5bmMgKCkgPT4gewogIGNvbnN0IHNjYW4gPSBoYW5kbGVycy5zY2FuOwogIGlmICghc2NhbikgdGhyb3cgbmV3IEVycm9yKCdTY2FuIHJlc29sdmVyIHdhcyBub3QgcmVnaXN0ZXJlZCcpOwogIGNvbnN0IG5vdyA9IERhdGUucGFyc2UoJzIwMjYtMTEtMjdUMTI6MDA6MDBaJyk7CiAgY29uc3QgY2xvY2sgPSB2aS5zcHlPbihEYXRlLCAnbm93JykubW9ja1JldHVyblZhbHVlKG5vdyk7CiAgY29uc3Qgb2xkID0gJzIwMjYtMTAtMDFUMTI6MDA6MDBaJzsKICBjb25zdCBlZGl0ZWQgPSB7IGlkOiAnZWRpdGVkJywgY3JlYXRlZDogb2xkLCB1cGRhdGVkOiAnMjAyNi0xMS0yMFQxMjowMDowMFonIH07CiAgY29uc3QgcHJvbWlzZSA9IHsgaWQ6ICdyZWNlbnQtcHJvbWlzZScsIGNyZWF0ZWQ6ICcyMDI2LTExLTE5VDEyOjAwOjAwWicgfTsKICBzZWFyY2hSZWNlbnRJc3N1ZXMubW9ja1Jlc29sdmVkVmFsdWUoeyBpdGVtczogW3sgaWQ6ICcxMicsIGtleTogJ0FQUC0xJywgZmllbGRzOiB7IHN1bW1hcnk6ICdEcmFmdCcsIGNvbW1lbnQ6IHsgY29tbWVudHM6IFsKICAgIHsgaWQ6ICd1bnRvdWNoZWQnLCBjcmVhdGVkOiBvbGQgfSwKICAgIGVkaXRlZCwKICAgIHsgaWQ6ICdpbnZhbGlkLWVkaXQtZGF0ZScsIGNyZWF0ZWQ6IG9sZCwgdXBkYXRlZDogJ3VuYXZhaWxhYmxlJyB9LAogICAgcHJvbWlzZSwKICBdIH0gfSB9XSwgbW9yZTogZmFsc2UgfSk7CiAgaW5nZXN0SmlyYUNvbW1lbnQubW9ja0NsZWFyKCkubW9ja1Jlc29sdmVkVmFsdWVPbmNlKHsgZm91bmQ6IDEsIHNldHRsZWQ6IDAgfSkubW9ja1Jlc29sdmVkVmFsdWVPbmNlKHsgZm91bmQ6IDAsIHNldHRsZWQ6IDEgfSk7CiAgdHJ5IHsKICAgIGNvbnN0IGlzc3VlID0geyBpZDogJzEyJywga2V5OiAnQVBQLTEnLCBzdW1tYXJ5OiAnRHJhZnQnIH07CiAgICBleHBlY3QoYXdhaXQgc2Nhbih7IGNvbnRleHQ6IHsgbW9kdWxlS2V5OiAnamlyYS1sZWRnZXInIH0gfSkpLnRvRXF1YWwoeyBzY2FubmVkOiAyLCBmb3VuZDogMSwgcGFydGlhbDogZmFsc2UgfSk7CiAgICBleHBlY3QoaW5nZXN0SmlyYUNvbW1lbnQpLnRvSGF2ZUJlZW5DYWxsZWRUaW1lcygyKTsKICAgIGV4cGVjdChpbmdlc3RKaXJhQ29tbWVudCkudG9IYXZlQmVlbk50aENhbGxlZFdpdGgoMSwgaXNzdWUsIHByb21pc2UsIG5vdywgdHJ1ZSk7CiAgICBleHBlY3QoaW5nZXN0SmlyYUNvbW1lbnQpLnRvSGF2ZUJlZW5OdGhDYWxsZWRXaXRoKDIsIGlzc3VlLCBlZGl0ZWQsIG5vdywgdHJ1ZSwgeyBzZXR0bGVtZW50T25seTogdHJ1ZSB9KTsKICB9IGZpbmFsbHkgewogICAgY2xvY2subW9ja1Jlc3RvcmUoKTsKICB9Cn0pOwoKaXQoJ3JlcGxheXMgSmlyYSBjb21tZW50cyBieSBjcmVhdGlvbiB0aW1lIHNvIGEgcmVwbHkgc2VlcyB0aGUgcHJvbWlzZSBpdCBmb2xsb3dzJywgYXN5bmMgKCkgPT4gewogIGNvbnN0IHNjYW4gPSBoYW5kbGVycy5zY2FuOwogIGlmICghc2NhbikgdGhyb3cgbmV3IEVycm9yKCdTY2FuIHJlc29sdmVyIHdhcyBub3QgcmVnaXN0ZXJlZCcpOwogIGNvbnN0IG5vdyA9IERhdGUucGFyc2UoJzIwMjYtMTEtMjdUMTI6MDA6MDBaJyk7CiAgY29uc3QgY2xvY2sgPSB2aS5zcHlPbihEYXRlLCAnbm93JykubW9ja1JldHVyblZhbHVlKG5vdyk7CiAgY29uc3QgcHJvbWlzZSA9IHsgaWQ6ICdwcm9taXNlJywgY3JlYXRlZDogJzIwMjYtMTEtMjBUMTI6MDA6MDBaJyB9OwogIGNvbnN0IHJlcGx5ID0geyBpZDogJ3JlcGx5JywgY3JlYXRlZDogJzIwMjYtMTEtMjFUMTI6MDA6MDBaJyB9OwogIHNlYXJjaFJlY2VudElzc3Vlcy5tb2NrUmVzb2x2ZWRWYWx1ZSh7IGl0ZW1zOiBbeyBpZDogJzEyJywga2V5OiAnQVBQLTEnLCBmaWVsZHM6IHsgc3VtbWFyeTogJ0RyYWZ0JywgY29tbWVudDogeyBjb21tZW50czogW3JlcGx5LCBwcm9taXNlXSB9IH0gfV0sIG1vcmU6IGZhbHNlIH0pOwogIGluZ2VzdEppcmFDb21tZW50Lm1vY2tDbGVhcigpLm1vY2tSZXNvbHZlZFZhbHVlKHsgZm91bmQ6IDAgfSk7CiAgdHJ5IHsKICAgIGF3YWl0IHNjYW4oeyBjb250ZXh0OiB7IG1vZHVsZUtleTogJ2ppcmEtbGVkZ2VyJyB9IH0pOwogICAgZXhwZWN0KGluZ2VzdEppcmFDb21tZW50Lm1vY2suY2FsbHMubWFwKChjYWxsKSA9PiBjYWxsWzFdKSkudG9FcXVhbChbcHJvbWlzZSwgcmVwbHldKTsKICB9IGZpbmFsbHkgewogICAgY2xvY2subW9ja1Jlc3RvcmUoKTsKICB9Cn0pOwoKaXQoJ2tlZXBzIHNjYW5uaW5nIG90aGVyIHBhZ2VzIGFuZCByZXBvcnRzIHBhcnRpYWwgcmVzdWx0cyB3aGVuIGNvbW1lbnRzIGNhbm5vdCBiZSByZWFkJywgYXN5bmMgKCkgPT4gewogIGNvbnN0IHJlY2VudCA9IG5ldyBEYXRlKERhdGUubm93KCkgLSA2MF8wMDApLnRvSVNPU3RyaW5nKCk7CiAgcmVjZW50UGFnZXMubW9ja1Jlc29sdmVkVmFsdWUoeyBpdGVtczogW3sgaWQ6ICdmaXJzdCcsIGNyZWF0ZWRBdDogcmVjZW50IH0sIHsgaWQ6ICdzZWNvbmQnLCBjcmVhdGVkQXQ6IHJlY2VudCB9XSwgbW9yZTogZmFsc2UgfSk7CiAgaW5nZXN0UGFnZS5tb2NrUmVzb2x2ZWRWYWx1ZSh7IGZvdW5kOiAwIH0pOwogIGluZ2VzdFBhZ2VDb21tZW50Lm1vY2tSZXNvbHZlZFZhbHVlKHsgZm91bmQ6IDEgfSk7CiAgcGFnZUNvbW1lbnRzLm1vY2tSZWplY3RlZFZhbHVlT25jZShuZXcgRXJyb3IoJ2NvbW1lbnRzIHVuYXZhaWxhYmxlJykpLm1vY2tSZXNvbHZlZFZhbHVlT25jZSh7IGl0ZW1zOiBbeyBpZDogJ3Zpc2libGUnLCB2ZXJzaW9uOiB7IGNyZWF0ZWRBdDogcmVjZW50IH0gfV0sIG1vcmU6IGZhbHNlIH0pOwoKICBjb25zdCBzY2FuID0gaGFuZGxlcnMuc2NhbjsKICBpZiAoIXNjYW4pIHRocm93IG5ldyBFcnJvcignU2NhbiByZXNvbHZlciB3YXMgbm90IHJlZ2lzdGVyZWQnKTsKICBjb25zdCByZXN1bHQgPSBhd2FpdCBzY2FuKHsgY29udGV4dDogeyBtb2R1bGVLZXk6ICdjb25mbHVlbmNlLWxlZGdlcicgfSB9KTsKCiAgZXhwZWN0KHJlc3VsdCkudG9NYXRjaE9iamVjdCh7IHNjYW5uZWQ6IDMsIGZvdW5kOiAxLCBwYXJ0aWFsOiB0cnVlIH0pOwogIGV4cGVjdChpbmdlc3RQYWdlQ29tbWVudCkudG9IYXZlQmVlbkNhbGxlZFRpbWVzKDEpOwp9KTsKCml0KCdpZ25vcmVzIG9sZGVyIENvbmZsdWVuY2Ugc25hcHNob3RzIHdoaWxlIHNjYW5uaW5nIHRoZWlyIHJlY2VudCBmb290ZXIgY29tbWVudHMnLCBhc3luYyAoKSA9PiB7CiAgY29uc3Qgc2NhbiA9IGhhbmRsZXJzLnNjYW47CiAgaWYgKCFzY2FuKSB0aHJvdyBuZXcgRXJyb3IoJ1NjYW4gcmVzb2x2ZXIgd2FzIG5vdCByZWdpc3RlcmVkJyk7CiAgY29uc3QgY2xvY2sgPSB2aS5zcHlPbihEYXRlLCAnbm93JykubW9ja1JldHVyblZhbHVlKERhdGUucGFyc2UoJzIwMjYtMTEtMjdUMTI6MDA6MDBaJykpOwogIGNvbnN0IG9sZCA9ICcyMDI2LTEwLTI3VDEyOjAwOjAwWic7CiAgY29uc3QgcmVjZW50ID0gJzIwMjYtMTEtMjBUMTI6MDA6MDBaJzsKICBjb25zdCBvbGRQYWdlID0geyBpZDogJ29sZC1wYWdlJywgY3JlYXRlZEF0OiBvbGQgfTsKICBjb25zdCBlZGl0ZWQgPSB7IGlkOiAnZWRpdGVkLXBhZ2UnLCBjcmVhdGVkQXQ6IG9sZCwgdmVyc2lvbjogeyBjcmVhdGVkQXQ6IHJlY2VudCB9IH07CiAgY29uc3QgbmV3Q29tbWVudCA9IHsgaWQ6ICdyZWNlbnQtY29tbWVudCcsIHZlcnNpb246IHsgY3JlYXRlZEF0OiByZWNlbnQgfSB9OwogIHJlY2VudFBhZ2VzLm1vY2tSZXNvbHZlZFZhbHVlKHsgaXRlbXM6IFtvbGRQYWdlLCBlZGl0ZWRdLCBtb3JlOiBmYWxzZSB9KTsKICBwYWdlQ29tbWVudHMubW9ja1Jlc29sdmVkVmFsdWVPbmNlKHsgaXRlbXM6IFt7IGlkOiAnb2xkLWNvbW1lbnQnLCB2ZXJzaW9uOiB7IGNyZWF0ZWRBdDogb2xkIH0gfSwgbmV3Q29tbWVudF0sIG1vcmU6IGZhbHNlIH0pLm1vY2tSZXNvbHZlZFZhbHVlT25jZSh7IGl0ZW1zOiBbXSwgbW9yZTogZmFsc2UgfSk7CiAgaW5nZXN0UGFnZS5tb2NrQ2xlYXIoKS5tb2NrUmVzb2x2ZWRWYWx1ZSh7IGZvdW5kOiAxIH0pOwogIGluZ2VzdFBhZ2VDb21tZW50Lm1vY2tDbGVhcigpLm1vY2tSZXNvbHZlZFZhbHVlKHsgZm91bmQ6IDEgfSk7CiAgdHJ5IHsKICAgIGV4cGVjdChhd2FpdCBzY2FuKHsgY29udGV4dDogeyBtb2R1bGVLZXk6ICdjb25mbHVlbmNlLWxlZGdlcicgfSB9KSkudG9FcXVhbCh7IHNjYW5uZWQ6IDIsIGZvdW5kOiAyLCBwYXJ0aWFsOiBmYWxzZSB9KTsKICAgIGV4cGVjdChpbmdlc3RQYWdlKS50b0hhdmVCZWVuQ2FsbGVkRXhhY3RseU9uY2VXaXRoKGVkaXRlZCwgRGF0ZS5ub3coKSwgdHJ1ZSk7CiAgICBleHBlY3QoaW5nZXN0UGFnZUNvbW1lbnQpLnRvSGF2ZUJlZW5DYWxsZWRFeGFjdGx5T25jZVdpdGgobmV3Q29tbWVudCwgRGF0ZS5ub3coKSwgb2xkUGFnZSwgdHJ1ZSk7CiAgfSBmaW5hbGx5IHsKICAgIGNsb2NrLm1vY2tSZXN0b3JlKCk7CiAgfQp9KTsKCml0KCdjb250aW51ZXMgYSBKaXJhIHNjYW4gYWZ0ZXIgYW4gaW5kaXZpZHVhbCBjb21tZW50IGNhbm5vdCBiZSByZWNvcmRlZCcsIGFzeW5jICgpID0+IHsKICBjb25zdCBzY2FuID0gaGFuZGxlcnMuc2NhbjsKICBpZiAoIXNjYW4pIHRocm93IG5ldyBFcnJvcignU2NhbiByZXNvbHZlciB3YXMgbm90IHJlZ2lzdGVyZWQnKTsKICBjb25zdCByZWNlbnQgPSBuZXcgRGF0ZShEYXRlLm5vdygpIC0gNjBfMDAwKS50b0lTT1N0cmluZygpOwogIGNvbnN0IGNvbW1lbnRzID0gW3sgaWQ6ICd1bmF2YWlsYWJsZScsIGNyZWF0ZWQ6IHJlY2VudCB9LCB7IGlkOiAndmlzaWJsZScsIGNyZWF0ZWQ6IHJlY2VudCB9XTsKICBzZWFyY2hSZWNlbnRJc3N1ZXMubW9ja1Jlc29sdmVkVmFsdWUoeyBpdGVtczogW3sgaWQ6ICcxMicsIGtleTogJ0FQUC0xJywgZmllbGRzOiB7IHN1bW1hcnk6ICdEcmFmdCcsIGNvbW1lbnQ6IHsgY29tbWVudHMgfSB9IH1dLCBtb3JlOiBmYWxzZSB9KTsKICBpbmdlc3RKaXJhQ29tbWVudC5tb2NrQ2xlYXIoKS5tb2NrUmVqZWN0ZWRWYWx1ZU9uY2UobmV3IEVycm9yKCdDb3VsZCBub3QgcmVjb3JkIGNvbW1lbnQnKSkubW9ja1Jlc29sdmVkVmFsdWVPbmNlKHsgZm91bmQ6IDEgfSk7CgogIGV4cGVjdChhd2FpdCBzY2FuKHsgY29udGV4dDogeyBtb2R1bGVLZXk6ICdqaXJhLWxlZGdlcicgfSB9KSkudG9FcXVhbCh7IHNjYW5uZWQ6IDEsIGZvdW5kOiAxLCBwYXJ0aWFsOiB0cnVlIH0pOwogIGV4cGVjdChpbmdlc3RKaXJhQ29tbWVudC5tb2NrLmNhbGxzLm1hcCgoY2FsbCkgPT4gY2FsbFsxXS5pZCkpLnRvRXF1YWwoWyd1bmF2YWlsYWJsZScsICd2aXNpYmxlJ10pOwp9KTsKCml0KCdjb250aW51ZXMgcmVhZGluZyBmb290ZXIgY29tbWVudHMgd2hlbiB0aGVpciBwYWdlIGNhbm5vdCBiZSByZWNvcmRlZCcsIGFzeW5jICgpID0+IHsKICBjb25zdCBzY2FuID0gaGFuZGxlcnMuc2NhbjsKICBpZiAoIXNjYW4pIHRocm93IG5ldyBFcnJvcignU2NhbiByZXNvbHZlciB3YXMgbm90IHJlZ2lzdGVyZWQnKTsKICBjb25zdCByZWNlbnQgPSBuZXcgRGF0ZShEYXRlLm5vdygpIC0gNjBfMDAwKS50b0lTT1N0cmluZygpOwogIGNvbnN0IHBhZ2UgPSB7IGlkOiAncGFnZScsIGNyZWF0ZWRBdDogcmVjZW50IH07CiAgY29uc3QgY29tbWVudHMgPSBbeyBpZDogJ3VuYXZhaWxhYmxlJywgdmVyc2lvbjogeyBjcmVhdGVkQXQ6IHJlY2VudCB9IH0sIHsgaWQ6ICd2aXNpYmxlJywgdmVyc2lvbjogeyBjcmVhdGVkQXQ6IHJlY2VudCB9IH1dOwogIHJlY2VudFBhZ2VzLm1vY2tSZXNvbHZlZFZhbHVlKHsgaXRlbXM6IFtwYWdlXSwgbW9yZTogZmFsc2UgfSk7CiAgcGFnZUNvbW1lbnRzLm1vY2tSZXNvbHZlZFZhbHVlKHsgaXRlbXM6IGNvbW1lbnRzLCBtb3JlOiBmYWxzZSB9KTsKICBpbmdlc3RQYWdlLm1vY2tSZWplY3RlZFZhbHVlT25jZShuZXcgRXJyb3IoJ0NvdWxkIG5vdCByZWNvcmQgcGFnZScpKTsKICBpbmdlc3RQYWdlQ29tbWVudC5tb2NrQ2xlYXIoKS5tb2NrUmVqZWN0ZWRWYWx1ZU9uY2UobmV3IEVycm9yKCdDb3VsZCBub3QgcmVjb3JkIGNvbW1lbnQnKSkubW9ja1Jlc29sdmVkVmFsdWVPbmNlKHsgZm91bmQ6IDEgfSk7CgogIGV4cGVjdChhd2FpdCBzY2FuKHsgY29udGV4dDogeyBtb2R1bGVLZXk6ICdjb25mbHVlbmNlLWxlZGdlcicgfSB9KSkudG9FcXVhbCh7IHNjYW5uZWQ6IDEsIGZvdW5kOiAxLCBwYXJ0aWFsOiB0cnVlIH0pOwogIGV4cGVjdChpbmdlc3RQYWdlQ29tbWVudC5tb2NrLmNhbGxzLm1hcCgoY2FsbCkgPT4gY2FsbFswXS5pZCkpLnRvRXF1YWwoWyd1bmF2YWlsYWJsZScsICd2aXNpYmxlJ10pOwp9KTsK
+import { expect, it, vi } from 'vitest';
+
+const { handlers, searchRecentIssues, recentPages, pageComments, ingestJiraComment, ingestPage, ingestPageComment } = vi.hoisted(() => ({
+  handlers: {} as Record<string, (params: { context: { moduleKey: string } }) => Promise<unknown>>,
+  searchRecentIssues: vi.fn(),
+  recentPages: vi.fn(),
+  pageComments: vi.fn(),
+  ingestJiraComment: vi.fn(),
+  ingestPage: vi.fn(),
+  ingestPageComment: vi.fn(),
+}));
+
+vi.mock('@forge/resolver', () => ({
+  default: class {
+    define(name: string, fn: (typeof handlers)[string]) { handlers[name] = fn; }
+    getDefinitions() { return handlers; }
+  },
+}));
+
+vi.mock('../src/site', () => ({
+  recentPages,
+  searchRecentIssues,
+  pageComments,
+}));
+vi.mock(import('../src/sources'), async (importOriginal) => ({
+  ...await importOriginal(),
+  ingestJiraComment, ingestPage, ingestPageComment,
+}));
+vi.mock('../src/store', () => ({}));
+
+await import('../src/resolver');
+
+it('imports only Jira comments in the advertised scan window', async () => {
+  const scan = handlers.scan;
+  if (!scan) throw new Error('Scan resolver was not registered');
+  const clock = vi.spyOn(Date, 'now').mockReturnValue(Date.parse('2026-11-27T12:00:00Z'));
+  const recent = { id: 'recent', created: '2026-10-28T12:00:00Z' };
+  searchRecentIssues.mockResolvedValue({ items: [{ id: '12', key: 'APP-1', fields: { summary: 'Draft', comment: { comments: [
+    { id: 'old', created: '2026-10-28T11:59:59Z' },
+    recent,
+    { id: 'invalid', created: 'unavailable' },
+  ] } } }], more: false });
+  ingestJiraComment.mockResolvedValue({ found: 1 });
+  try {
+    expect(await scan({ context: { moduleKey: 'jira-ledger' } })).toEqual({ scanned: 1, found: 1, partial: true });
+    expect(ingestJiraComment).toHaveBeenCalledExactlyOnceWith({ id: '12', key: 'APP-1', summary: 'Draft' }, recent, Date.now(), true);
+  } finally {
+    clock.mockRestore();
+  }
+});
+
+it('checks recently edited older Jira comments only for settlement replies', async () => {
+  const scan = handlers.scan;
+  if (!scan) throw new Error('Scan resolver was not registered');
+  const now = Date.parse('2026-11-27T12:00:00Z');
+  const clock = vi.spyOn(Date, 'now').mockReturnValue(now);
+  const old = '2026-10-01T12:00:00Z';
+  const edited = { id: 'edited', created: old, updated: '2026-11-20T12:00:00Z' };
+  const promise = { id: 'recent-promise', created: '2026-11-19T12:00:00Z' };
+  searchRecentIssues.mockResolvedValue({ items: [{ id: '12', key: 'APP-1', fields: { summary: 'Draft', comment: { comments: [
+    { id: 'untouched', created: old },
+    edited,
+    { id: 'invalid-edit-date', created: old, updated: 'unavailable' },
+    promise,
+  ] } } }], more: false });
+  ingestJiraComment.mockClear().mockResolvedValueOnce({ found: 1, settled: 0 }).mockResolvedValueOnce({ found: 0, settled: 1 });
+  try {
+    const issue = { id: '12', key: 'APP-1', summary: 'Draft' };
+    expect(await scan({ context: { moduleKey: 'jira-ledger' } })).toEqual({ scanned: 2, found: 1, partial: false });
+    expect(ingestJiraComment).toHaveBeenCalledTimes(2);
+    expect(ingestJiraComment).toHaveBeenNthCalledWith(1, issue, promise, now, true);
+    expect(ingestJiraComment).toHaveBeenNthCalledWith(2, issue, edited, now, true, { settlementOnly: true });
+  } finally {
+    clock.mockRestore();
+  }
+});
+
+it('replays Jira comments by creation time so a reply sees the promise it follows', async () => {
+  const scan = handlers.scan;
+  if (!scan) throw new Error('Scan resolver was not registered');
+  const now = Date.parse('2026-11-27T12:00:00Z');
+  const clock = vi.spyOn(Date, 'now').mockReturnValue(now);
+  const promise = { id: 'promise', created: '2026-11-20T12:00:00Z' };
+  const reply = { id: 'reply', created: '2026-11-21T12:00:00Z' };
+  searchRecentIssues.mockResolvedValue({ items: [{ id: '12', key: 'APP-1', fields: { summary: 'Draft', comment: { comments: [reply, promise] } } }], more: false });
+  ingestJiraComment.mockClear().mockResolvedValue({ found: 0 });
+  try {
+    await scan({ context: { moduleKey: 'jira-ledger' } });
+    expect(ingestJiraComment.mock.calls.map((call) => call[1])).toEqual([promise, reply]);
+  } finally {
+    clock.mockRestore();
+  }
+});
+
+it('keeps scanning other pages and reports partial results when comments cannot be read', async () => {
+  const recent = new Date(Date.now() - 60_000).toISOString();
+  recentPages.mockResolvedValue({ items: [{ id: 'first', createdAt: recent }, { id: 'second', createdAt: recent }], more: false });
+  ingestPage.mockResolvedValue({ found: 0 });
+  ingestPageComment.mockResolvedValue({ found: 1 });
+  pageComments.mockRejectedValueOnce(new Error('comments unavailable')).mockResolvedValueOnce({ items: [{ id: 'visible', version: { createdAt: recent } }], more: false });
+
+  const scan = handlers.scan;
+  if (!scan) throw new Error('Scan resolver was not registered');
+  const result = await scan({ context: { moduleKey: 'confluence-ledger' } });
+
+  expect(result).toMatchObject({ scanned: 3, found: 1, partial: true });
+  expect(ingestPageComment).toHaveBeenCalledTimes(1);
+});
+
+it('ignores older Confluence snapshots while scanning their recent footer comments', async () => {
+  const scan = handlers.scan;
+  if (!scan) throw new Error('Scan resolver was not registered');
+  const clock = vi.spyOn(Date, 'now').mockReturnValue(Date.parse('2026-11-27T12:00:00Z'));
+  const old = '2026-10-27T12:00:00Z';
+  const recent = '2026-11-20T12:00:00Z';
+  const oldPage = { id: 'old-page', createdAt: old };
+  const edited = { id: 'edited-page', createdAt: old, version: { createdAt: recent } };
+  const newComment = { id: 'recent-comment', version: { createdAt: recent } };
+  recentPages.mockResolvedValue({ items: [oldPage, edited], more: false });
+  pageComments.mockResolvedValueOnce({ items: [{ id: 'old-comment', version: { createdAt: old } }, newComment], more: false }).mockResolvedValueOnce({ items: [], more: false });
+  ingestPage.mockClear().mockResolvedValue({ found: 1 });
+  ingestPageComment.mockClear().mockResolvedValue({ found: 1 });
+  try {
+    expect(await scan({ context: { moduleKey: 'confluence-ledger' } })).toEqual({ scanned: 2, found: 2, partial: false });
+    expect(ingestPage).toHaveBeenCalledExactlyOnceWith(edited, Date.now(), true);
+    expect(ingestPageComment).toHaveBeenCalledExactlyOnceWith(newComment, Date.now(), oldPage, true);
+  } finally {
+    clock.mockRestore();
+  }
+});
+
+it('continues a Jira scan after an individual comment cannot be recorded', async () => {
+  const scan = handlers.scan;
+  if (!scan) throw new Error('Scan resolver was not registered');
+  const recent = new Date(Date.now() - 60_000).toISOString();
+  const comments = [{ id: 'unavailable', created: recent }, { id: 'visible', created: recent }];
+  searchRecentIssues.mockResolvedValue({ items: [{ id: '12', key: 'APP-1', fields: { summary: 'Draft', comment: { comments } } }], more: false });
+  ingestJiraComment.mockClear().mockRejectedValueOnce(new Error('Could not record comment')).mockResolvedValueOnce({ found: 1 });
+
+  expect(await scan({ context: { moduleKey: 'jira-ledger' } })).toEqual({ scanned: 1, found: 1, partial: true });
+  expect(ingestJiraComment.mock.calls.map((call) => call[1].id)).toEqual(['unavailable', 'visible']);
+});
+
+it('continues reading footer comments when their page cannot be recorded', async () => {
+  const scan = handlers.scan;
+  if (!scan) throw new Error('Scan resolver was not registered');
+  const recent = new Date(Date.now() - 60_000).toISOString();
+  const page = { id: 'page', createdAt: recent };
+  const comments = [{ id: 'unavailable', version: { createdAt: recent } }, { id: 'visible', version: { createdAt: recent } }];
+  recentPages.mockResolvedValue({ items: [page], more: false });
+  pageComments.mockResolvedValue({ items: comments, more: false });
+  ingestPage.mockRejectedValueOnce(new Error('Could not record page'));
+  ingestPageComment.mockClear().mockRejectedValueOnce(new Error('Could not record comment')).mockResolvedValueOnce({ found: 1 });
+
+  expect(await scan({ context: { moduleKey: 'confluence-ledger' } })).toEqual({ scanned: 1, found: 1, partial: true });
+  expect(ingestPageComment.mock.calls.map((call) => call[0].id)).toEqual(['unavailable', 'visible']);
+});
