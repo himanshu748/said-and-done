@@ -26,6 +26,8 @@ npm ci && npm run demo
 Open [localhost:4173](http://localhost:4173) to try the ledger with sample data.
 For a live test, sign in as an admin of a site with Jira and Confluence and use
 the judge build linked from Devpost. See [setup and examples](docs/development.md).
+The [native Forge check](docs/evidence/native-forge-2026-11-28.md) shows how
+real Jira and Confluence replies change the ledger.
 
 [Video](https://youtu.be/_fGu7I4yyG0) · [Devpost](https://devpost.com/software/said-done-fmg1ez) ·
 [Privacy](PRIVACY.md)
