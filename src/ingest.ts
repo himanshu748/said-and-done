@@ -2,7 +2,7 @@
 import { adfToBlocks, type Block } from './core/adf';
 import { dayInZone } from './core/dates';
 import { detectPromises } from './core/detect';
-import { overlap, pickPromise, readSignal } from './core/followup';
+import { overlap, pickPromise, readReply } from './core/followup';
 import { fromCandidate, refresh, withEvent, type FollowUp, type Source } from './core/ledger';
 import { MARKER } from './core/reminder';
 import { getUser, type Product, type SiteUser } from './site';
@@ -50,20 +50,23 @@ export async function ingest(args: { source: Source; doc: unknown; authorId: str
   const writtenAt = args.writtenAt.getTime();
   const result: IngestResult = { found: 0, settled: 0 };
   const authorPerson = { accountId: author.accountId, name: author.name };
+  const promises = detectPromises(blocks, writtenOn);
 
   // A comment from an owner can settle their earlier promise in the same issue or page.
   if (!isPage) {
-    const signal = readSignal(text);
-    const all = signal ? await listForContainer(product, source.containerId) : [];
+    const reply = readReply(text);
+    const all = reply ? await listForContainer(product, source.containerId) : [];
     const replyAt = args.replyAt ?? writtenAt;
-    if (signal && !all.some((f) => f.settledBy === source.itemId)) {
+    if (reply && !all.some((f) => f.settledBy === source.itemId)) {
+      const { signal } = reply;
       const open = all.filter(
         (f) => f.owner.accountId === author.accountId && f.source.itemId !== source.itemId && (f.status === 'open' || (f.status === 'slipping' && signal === 'done')) && (f.writtenAt !== undefined ? f.writtenAt < replyAt : f.createdAt < now),
       );
-      const hit = pickPromise(open, text);
+      const needsMatch = args.settlementOnly || promises.length > 0;
+      const evidence = needsMatch ? reply.evidence : text;
+      const hit = pickPromise(open, evidence);
       // A reply about text marked not a promise settles nothing else.
-      // Older edits must also mention some of the promised action.
-      if (hit && !hit.dismissed && (!args.settlementOnly || overlap(hit.action, text) > 0)) {
+      if (hit && !hit.dismissed && (!needsMatch || overlap(hit.action, evidence) > 0)) {
         await saveFollowUp(withEvent(hit, { status: signal === 'done' ? 'kept' : 'slipping', settledBy: source.itemId }, signal === 'done' ? `Kept — ${author.name} replied` : `Slipping — ${author.name} asked for more time`, now, replyAt));
         result.settled++;
       }
@@ -72,7 +75,7 @@ export async function ingest(args: { source: Source; doc: unknown; authorId: str
 
   if (args.settlementOnly) return result;
   const seen = new Set<string>();
-  for (const c of detectPromises(blocks, writtenOn)) {
+  for (const c of promises) {
     seen.add(c.fingerprint);
     let owner = authorPerson;
     if (c.owner.kind === 'mention') {
