@@ -3,8 +3,9 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
 const original = readFileSync('manifest.yml', 'utf8');
-const identity = /^  id: ari:cloud:ecosystem::app\/([^\s]+)$/m;
-const sourceId = original.match(identity)![1]!;
+const identity = /^ {2}id: ari:cloud:ecosystem::app\/([^\s]+)$/m;
+const sourceId = original.match(identity)?.[1] ?? '';
+if (!sourceId) throw new Error('Fixture manifest is missing its app identity.');
 const exampleJudgeId = '11111111-2222-4333-8444-555555555555';
 const check = (id: string, option = '--check') =>
   spawnSync('bash', ['scripts/judge-build.sh', option], {
