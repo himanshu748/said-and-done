@@ -148,7 +148,7 @@ resolver.define('scan', async ({ context }) => {
       }
       // Recent footer comments can belong to a page whose own text is older.
       if (timedOut()) break;
-      const comments = await pageComments('user', p.id).catch(() => ({ items: [], more: true }));
+      const comments = await pageComments('user', p.id, timedOut).catch(() => ({ items: [], more: true }));
       partial ||= comments.more;
       const ordered = comments.items
         .map((comment) => ({ comment, time: Date.parse(comment.version?.createdAt ?? '') }))

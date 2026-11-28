@@ -159,10 +159,27 @@ export async function recentPages(as: As, limit: number): Promise<ScanPage<Confl
   return { items: page.results, more: Boolean(page._links?.next) };
 }
 
-export async function pageComments(as: As, pageId: string): Promise<ScanPage<ConfluenceComment>> {
-  const res = await client(as).requestConfluence(route`/wiki/api/v2/pages/${pageId}/footer-comments?body-format=atlas_doc_format&limit=50`);
-  const page = await json<{ results: ConfluenceComment[]; _links?: { next?: string } }>(res, 'page comments');
-  return { items: page.results.map((c) => ({ ...c, pageId })), more: Boolean(page._links?.next) };
+export async function pageComments(as: As, pageId: string, shouldStop: () => boolean): Promise<ScanPage<ConfluenceComment>> {
+  const items: ConfluenceComment[] = [];
+  const cursors = new Set<string>();
+  let cursor: string | null = null;
+  do {
+    const path = cursor
+      ? route`/wiki/api/v2/pages/${pageId}/footer-comments?body-format=atlas_doc_format&limit=50&cursor=${cursor}`
+      : route`/wiki/api/v2/pages/${pageId}/footer-comments?body-format=atlas_doc_format&limit=50`;
+    try {
+      const res = await client(as).requestConfluence(path);
+      const page = await json<{ results: ConfluenceComment[]; _links?: { next?: string } }>(res, 'page comments');
+      for (const comment of page.results) items.push({ ...comment, pageId });
+      if (!page._links?.next) return { items, more: false };
+      cursor = new URL(page._links.next, 'https://confluence.invalid').searchParams.get('cursor');
+      if (!cursor || cursors.has(cursor)) return { items, more: true };
+      cursors.add(cursor);
+    } catch {
+      return { items, more: true };
+    }
+  } while (!shouldStop());
+  return { items, more: true };
 }
 
 export async function visiblePageIds(ids: string[]): Promise<Set<string>> {
