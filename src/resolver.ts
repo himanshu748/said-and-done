@@ -150,10 +150,13 @@ resolver.define('scan', async ({ context }) => {
       if (timedOut()) break;
       const comments = await pageComments('user', p.id).catch(() => ({ items: [], more: true }));
       partial ||= comments.more;
-      for (const c of comments.items) {
+      const ordered = comments.items
+        .map((comment) => ({ comment, time: Date.parse(comment.version?.createdAt ?? '') }))
+        .filter(({ time }) => inScanWindow(time))
+        .sort((a, b) => a.time - b.time);
+      for (const { comment } of ordered) {
         if (timedOut()) break;
-        if (!inScanWindow(c.version?.createdAt)) continue;
-        await record(ingestPageComment(c, now, p, true));
+        await record(ingestPageComment(comment, now, p, true));
       }
     }
   }
