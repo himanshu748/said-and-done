@@ -139,6 +139,8 @@ resolver.define('scan', async ({ context }) => {
       }
     }
   } else {
+    // Leave the last five seconds of the scan to ingest comments already fetched.
+    const commentDeadline = deadline - 5_000;
     const pages = await recentPages('user', 25);
     partial ||= pages.more;
     for (const p of pages.items) {
@@ -148,7 +150,7 @@ resolver.define('scan', async ({ context }) => {
       }
       // Recent footer comments can belong to a page whose own text is older.
       if (timedOut()) break;
-      const comments = await pageComments('user', p.id, timedOut).catch(() => ({ items: [], more: true }));
+      const comments = await pageComments('user', p.id, commentDeadline).catch(() => ({ items: [], more: true }));
       partial ||= comments.more;
       const ordered = comments.items
         .map((comment) => ({ comment, time: Date.parse(comment.version?.createdAt ?? '') }))
