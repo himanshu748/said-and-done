@@ -172,6 +172,19 @@ describe('ingest', () => {
     ] }]);
   });
 
+  it.each([false, true])('does not use a new promise to match an unrelated completion (settlement only: %s)', async (settlementOnly) => {
+    const args = { authorId: 'acc', writtenAt: new Date(at), now: at };
+    await ingest({ ...args, source: source('proposal'), doc: doc("I'll send the proposal by Friday") });
+    const replyAt = at + 1000;
+    const reply = await ingest({
+      ...args, source: source('reply'), doc: doc("Sent the agenda. I'll send the proposal by Friday."),
+      writtenAt: new Date(replyAt), now: replyAt, settlementOnly,
+    });
+
+    expect(reply).toEqual({ found: settlementOnly ? 0 : 1, settled: 0 });
+    expect([...db.values()].every((record) => record.status === 'open')).toBe(true);
+  });
+
   it('never brings back text marked not a promise', async () => {
     const args = { source: source('1'), doc: doc("I'll send the redlines by Friday"), authorId: 'acc', writtenAt: new Date(at), now: at };
     expect((await ingest(args)).found).toBe(1);

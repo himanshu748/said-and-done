@@ -7,20 +7,25 @@ const DONE = /\b(done|sent|shared|attached|uploaded|published|merged|shipped|sub
 const NEGATED = /(?:\b(?:not|yet to|still|almost|nearly|once|when|after|will be|will|going to)|n['’]t|['’]ll)\b[\w\s,'’]{0,24}$/i;
 const SLIPPING = /\b(running (?:a bit )?late|need (?:a bit |a little |some )?more time|push(?:ing)? (?:this|it) (?:back|out)|delayed|won['’]t make|can['’]t make|will be late|slipping|behind on|another (?:day|week) or two)\b/i;
 
-export function readSignal(text: string): Signal | null {
-  const parts = text.split(/(?<=[.!?])\s+/).filter((p) => p.trim() && !/\?\s*$/.test(p));
-  if (parts.length > 1) {
-    const signals = parts.map(readSignal);
-    return signals.includes('slipping') ? 'slipping' : (signals.find((s) => s) ?? null);
-  }
-  if (!parts.length) return null;
-  text = parts[0] ?? '';
+function sentenceSignal(text: string): Signal | null {
   const s = SLIPPING.exec(text);
   if (s && !/(?:\bnot|n['’]t)\b[\w\s,'’]{0,12}$/i.test(text.slice(0, s.index))) return 'slipping';
   const m = DONE.exec(text);
   if (!m) return null;
   if (NEGATED.test(text.slice(0, m.index))) return null;
   return 'done';
+}
+
+/** Keeps the sentences that supplied the selected status. */
+export function readReply(text: string): { signal: Signal; evidence: string } | null {
+  const parts = text.split(/(?<=[.!?])\s+/).filter((p) => p.trim() && !/\?\s*$/.test(p));
+  const replies = parts.map((part) => ({ part, signal: sentenceSignal(part) }));
+  const signal = replies.find((r) => r.signal === 'slipping')?.signal ?? replies.find((r) => r.signal)?.signal;
+  return signal ? { signal, evidence: replies.filter((r) => r.signal === signal).map((r) => r.part).join(' ') } : null;
+}
+
+export function readSignal(text: string): Signal | null {
+  return readReply(text)?.signal ?? null;
 }
 
 const STOP = new Set('the a an to and or of for on in by with it this that you your i we our will be is me my get have send share up over back out'.split(' '));
