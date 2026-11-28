@@ -80,3 +80,23 @@ it('keeps the first page and marks the scan partial when a later comment page fa
   expect(await scan('confluence-ledger')).toEqual({ scanned: 2, found: 2, partial: true });
   expect(confluence).toHaveBeenCalledTimes(3);
 });
+
+it('replays collected comments even if the next page stalls', async () => {
+  vi.useFakeTimers();
+  try {
+    const createdAt = new Date(Date.now() - 60_000).toISOString();
+    confluence
+      .mockResolvedValueOnce(response({ results: [{ id: 'p1', createdAt }] }))
+      .mockResolvedValueOnce(response({ results: [{ id: 'c1', version: { createdAt } }], _links: { next: '/footer-comments?cursor=next' } }))
+      .mockImplementationOnce(() => new Promise(() => {}));
+    const finished = vi.fn();
+    void scan('confluence-ledger').then(finished);
+
+    await vi.advanceTimersByTimeAsync(15_000);
+
+    expect(confluence).toHaveBeenCalledTimes(3);
+    expect(finished).toHaveBeenCalledWith({ scanned: 2, found: 2, partial: true });
+  } finally {
+    vi.useRealTimers();
+  }
+});
