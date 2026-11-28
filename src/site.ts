@@ -159,26 +159,34 @@ export async function recentPages(as: As, limit: number): Promise<ScanPage<Confl
   return { items: page.results, more: Boolean(page._links?.next) };
 }
 
-export async function pageComments(as: As, pageId: string, shouldStop: () => boolean): Promise<ScanPage<ConfluenceComment>> {
+export async function pageComments(as: As, pageId: string, deadline: number): Promise<ScanPage<ConfluenceComment>> {
   const items: ConfluenceComment[] = [];
   const cursors = new Set<string>();
   let cursor: string | null = null;
-  do {
-    const path = cursor
-      ? route`/wiki/api/v2/pages/${pageId}/footer-comments?body-format=atlas_doc_format&limit=50&cursor=${cursor}`
-      : route`/wiki/api/v2/pages/${pageId}/footer-comments?body-format=atlas_doc_format&limit=50`;
-    try {
-      const res = await client(as).requestConfluence(path);
-      const page = await json<{ results: ConfluenceComment[]; _links?: { next?: string } }>(res, 'page comments');
+  const remaining = deadline - Date.now();
+  if (remaining <= 0) return { items, more: true };
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<null>((resolve) => { timer = setTimeout(() => resolve(null), remaining); });
+  try {
+    while (Date.now() < deadline) {
+      const path: ReturnType<typeof route> = cursor
+        ? route`/wiki/api/v2/pages/${pageId}/footer-comments?body-format=atlas_doc_format&limit=50&cursor=${cursor}`
+        : route`/wiki/api/v2/pages/${pageId}/footer-comments?body-format=atlas_doc_format&limit=50`;
+      const response = client(as).requestConfluence(path)
+        .then((res) => json<{ results: ConfluenceComment[]; _links?: { next?: string } }>(res, 'page comments'));
+      const page = await Promise.race([response, timeout]);
+      if (!page) break;
       for (const comment of page.results) items.push({ ...comment, pageId });
       if (!page._links?.next) return { items, more: false };
       cursor = new URL(page._links.next, 'https://confluence.invalid').searchParams.get('cursor');
       if (!cursor || cursors.has(cursor)) return { items, more: true };
       cursors.add(cursor);
-    } catch {
-      return { items, more: true };
     }
-  } while (!shouldStop());
+  } catch {
+    return { items, more: true };
+  } finally {
+    clearTimeout(timer);
+  }
   return { items, more: true };
 }
 
