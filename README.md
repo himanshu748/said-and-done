@@ -15,7 +15,16 @@ Forge listens for Jira and Confluence changes, stores follow-ups in Forge KVS,
 and runs scheduled reminders. The Jira issue panel, Confluence byline, and
 ledger show the same state. Detection uses the text and dates on the site.
 
-## Quickstart
+## Try the native judge build
+
+Use the signed **Said & Done (judge build)** install link in the
+[Codegeist entry](https://devpost.com/software/said-done-fmg1ez). An admin
+installs it on an Atlassian Cloud test site with Jira and Confluence.
+
+- [Judge setup and repeatable checks](docs/development.md#try-it-on-an-atlassian-site)
+- [Recorded native Jira and Confluence checks](docs/evidence/native-forge-2026-11-28.md)
+
+## Try the local fixture
 
 From a fresh clone with Node 22 or newer:
 
@@ -24,10 +33,8 @@ npm ci && npm run demo
 ~~~
 
 Open [localhost:4173](http://localhost:4173) to try the ledger with sample data.
-For a live test, sign in as an admin of a site with Jira and Confluence and use
-the judge build linked from Devpost. See [setup and examples](docs/development.md).
-The [native Forge check](docs/evidence/native-forge-2026-11-28.md) shows how
-real Jira and Confluence replies change the ledger.
+This path uses a mocked Forge bridge. It resets on reload and does not connect
+to Jira or Confluence.
 
 [Video](https://youtu.be/_fGu7I4yyG0) · [Devpost](https://devpost.com/software/said-done-fmg1ez) ·
 [Privacy](PRIVACY.md)
