@@ -11,6 +11,9 @@ describe('readSignal', () => {
   it.each(['Is the contract signed?', "I'm not running late", 'Not delayed at all'])('ignores questions and denials: %s', (t) => {
     expect(readSignal(t)).toBeNull();
   });
+  it.each(['Have you sent the contract\nfor review?', 'Not\ndone yet'])('keeps question and denial context around hard line breaks: %s', (text) => {
+    expect(readSignal(text)).toBeNull();
+  });
   it.each(['Sent! Contract is attached.', 'Done — see the updated deck.', "Here's the signed NDA", 'Just shared the folder with you'])('done: %s', (t) => {
     expect(readSignal(t)).toBe('done');
   });

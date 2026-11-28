@@ -18,7 +18,7 @@ function sentenceSignal(text: string): Signal | null {
 
 /** Keeps the sentences that supplied the selected status. */
 export function readReply(text: string): { signal: Signal; evidence: string } | null {
-  const parts = text.split(/\n+|(?<=[.!?])\s+/).filter((p) => p.trim() && !/\?\s*$/.test(p));
+  const parts = text.split(/(?<=[.!?])\s+/).filter((p) => p.trim() && !/\?\s*$/.test(p));
   const replies = parts.map((part) => ({ part, signal: sentenceSignal(part) }));
   const signal = replies.find((r) => r.signal === 'slipping')?.signal ?? replies.find((r) => r.signal)?.signal;
   return signal ? { signal, evidence: replies.filter((r) => r.signal === signal).map((r) => r.part).join(' ') } : null;
