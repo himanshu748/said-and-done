@@ -48,11 +48,55 @@ it.each(['issues', 'comments'])('reports a partial Jira scan when the %s respons
   expect(jira).toHaveBeenCalledTimes(1);
 });
 
-it.each(['pages', 'comments'])('reports a partial Confluence scan when the %s response has a next cursor', async (kind) => {
+it('reports a partial Confluence scan when the pages response has a next cursor', async () => {
   const createdAt = new Date(Date.now() - 60_000).toISOString();
   confluence
-    .mockResolvedValueOnce(response({ results: [{ id: 'p1', createdAt }], ...(kind === 'pages' ? { _links: { next: '/pages?cursor=next' } } : {}) }))
-    .mockResolvedValueOnce(response({ results: [{ id: 'c1', version: { createdAt } }], ...(kind === 'comments' ? { _links: { next: '/footer-comments?cursor=next' } } : {}) }));
+    .mockResolvedValueOnce(response({ results: [{ id: 'p1', createdAt }], _links: { next: '/pages?cursor=next' } }))
+    .mockResolvedValueOnce(response({ results: [{ id: 'c1', version: { createdAt } }] }));
   expect(await scan('confluence-ledger')).toEqual({ scanned: 2, found: 2, partial: true });
   expect(confluence).toHaveBeenCalledTimes(2);
+});
+
+it('scans Confluence footer comments across pages and replays them chronologically', async () => {
+  const createdAt = new Date(Date.now() - 60_000).toISOString();
+  const earlier = new Date(Date.now() - 120_000).toISOString();
+  const { ingestPageComment } = await import('../src/sources');
+  vi.mocked(ingestPageComment).mockClear();
+  confluence
+    .mockResolvedValueOnce(response({ results: [{ id: 'p1', createdAt }] }))
+    .mockResolvedValueOnce(response({ results: [{ id: 'reply', version: { createdAt } }], _links: { next: '/footer-comments?cursor=next' } }))
+    .mockResolvedValueOnce(response({ results: [{ id: 'promise', version: { createdAt: earlier } }] }));
+  expect(await scan('confluence-ledger')).toEqual({ scanned: 3, found: 3, partial: false });
+  expect(confluence.mock.calls[2]?.[0]).toContain('cursor=next');
+  expect(vi.mocked(ingestPageComment).mock.calls.map(([comment]) => comment.id)).toEqual(['promise', 'reply']);
+});
+
+it('keeps the first page and marks the scan partial when a later comment page fails', async () => {
+  const createdAt = new Date(Date.now() - 60_000).toISOString();
+  confluence
+    .mockResolvedValueOnce(response({ results: [{ id: 'p1', createdAt }] }))
+    .mockResolvedValueOnce(response({ results: [{ id: 'c1', version: { createdAt } }], _links: { next: '/footer-comments?cursor=next' } }))
+    .mockRejectedValueOnce(new Error('Confluence unavailable'));
+  expect(await scan('confluence-ledger')).toEqual({ scanned: 2, found: 2, partial: true });
+  expect(confluence).toHaveBeenCalledTimes(3);
+});
+
+it('replays collected comments even if the next page stalls', async () => {
+  vi.useFakeTimers();
+  try {
+    const createdAt = new Date(Date.now() - 60_000).toISOString();
+    confluence
+      .mockResolvedValueOnce(response({ results: [{ id: 'p1', createdAt }] }))
+      .mockResolvedValueOnce(response({ results: [{ id: 'c1', version: { createdAt } }], _links: { next: '/footer-comments?cursor=next' } }))
+      .mockImplementationOnce(() => new Promise(() => {}));
+    const finished = vi.fn();
+    void scan('confluence-ledger').then(finished);
+
+    await vi.advanceTimersByTimeAsync(15_000);
+
+    expect(confluence).toHaveBeenCalledTimes(3);
+    expect(finished).toHaveBeenCalledWith({ scanned: 2, found: 2, partial: true });
+  } finally {
+    vi.useRealTimers();
+  }
 });
