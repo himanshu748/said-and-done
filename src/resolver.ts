@@ -1,1 +1,163 @@
-aW1wb3J0IFJlc29sdmVyIGZyb20gJ0Bmb3JnZS9yZXNvbHZlcic7CmltcG9ydCB7IHNvcnRGb3JMZWRnZXIsIHN0YXRzLCB3aXRoRXZlbnQsIHR5cGUgRm9sbG93VXAsIHR5cGUgU3RhdHVzIH0gZnJvbSAnLi9jb3JlL2xlZGdlcic7CmltcG9ydCB7IGVuZE9mRGF5SW5ab25lLCBpc0NhbGVuZGFyRGF5IH0gZnJvbSAnLi9jb3JlL2RhdGVzJzsKaW1wb3J0IHsgcmVjZW50UGFnZXMsIHBhZ2VDb21tZW50cywgc2VhcmNoUmVjZW50SXNzdWVzLCB2aXNpYmxlSXNzdWVJZHMsIHZpc2libGVQYWdlSWRzLCBnZXRVc2VyLCB0eXBlIFByb2R1Y3QgfSBmcm9tICcuL3NpdGUnOwppbXBvcnQgeyBpbmdlc3RKaXJhQ29tbWVudCwgaW5nZXN0UGFnZSwgaW5nZXN0UGFnZUNvbW1lbnQsIGppcmFDb21tZW50UmV2aXNpb25BdCB9IGZyb20gJy4vc291cmNlcyc7CmltcG9ydCB7IGdldEZvbGxvd1VwLCBsaXN0Rm9sbG93VXBzLCBsaXN0Rm9yQ29udGFpbmVyLCBzYXZlRm9sbG93VXAgfSBmcm9tICcuL3N0b3JlJzsKCmludGVyZmFjZSBDdHggewogIGFjY291bnRJZD86IHN0cmluZzsKICBtb2R1bGVLZXk/OiBzdHJpbmc7CiAgZXh0ZW5zaW9uPzogeyB0eXBlPzogc3RyaW5nOyBpc3N1ZT86IHsgaWQ/OiBzdHJpbmcgfCBudW1iZXIgfTsgY29udGVudD86IHsgaWQ/OiBzdHJpbmcgfCBudW1iZXIgfSB9Owp9Cgpjb25zdCBwcm9kdWN0T2YgPSAoY3R4OiBDdHgpOiBQcm9kdWN0ID0+IChjdHgubW9kdWxlS2V5Py5zdGFydHNXaXRoKCdjb25mbHVlbmNlJykgPyAnY29uZmx1ZW5jZScgOiAnamlyYScpOwpjb25zdCBjb250YWluZXJPZiA9IChjdHg6IEN0eCk6IHN0cmluZyB8IG51bGwgPT4gewogIGNvbnN0IGlkID0gY3R4LmV4dGVuc2lvbj8uaXNzdWU/LmlkID8/IGN0eC5leHRlbnNpb24/LmNvbnRlbnQ/LmlkOwogIHJldHVybiBpZCA9PT0gdW5kZWZpbmVkID8gbnVsbCA6IFN0cmluZyhpZCk7Cn07Cgphc3luYyBmdW5jdGlvbiB2aXNpYmxlKHByb2R1Y3Q6IFByb2R1Y3QsIGl0ZW1zOiBGb2xsb3dVcFtdKTogUHJvbWlzZTxGb2xsb3dVcFtdPiB7CiAgY29uc3Qgc2NvcGVkID0gaXRlbXMuZmlsdGVyKChmKSA9PiBmLnNvdXJjZS5wcm9kdWN0ID09PSBwcm9kdWN0KTsKICBjb25zdCBpZHMgPSBbLi4ubmV3IFNldChzY29wZWQubWFwKChmKSA9PiBmLnNvdXJjZS5jb250YWluZXJJZCkpXTsKICBpZiAoIWlkcy5sZW5ndGgpIHJldHVybiBbXTsKICBjb25zdCBvayA9IHByb2R1Y3QgPT09ICdqaXJhJyA/IGF3YWl0IHZpc2libGVJc3N1ZUlkcyhpZHMpIDogYXdhaXQgdmlzaWJsZVBhZ2VJZHMoaWRzKTsKICByZXR1cm4gc2NvcGVkLmZpbHRlcigoZikgPT4gb2suaGFzKGYuc291cmNlLmNvbnRhaW5lcklkKSk7Cn0KCmFzeW5jIGZ1bmN0aW9uIGVkaXRhYmxlKGN0eDogQ3R4LCBpZDogc3RyaW5nKTogUHJvbWlzZTxGb2xsb3dVcD4gewogIGNvbnN0IGYgPSBhd2FpdCBnZXRGb2xsb3dVcChpZCk7CiAgaWYgKCFmKSB0aHJvdyBuZXcgRXJyb3IoJ1RoaXMgZm9sbG93LXVwIG5vIGxvbmdlciBleGlzdHMuJyk7CiAgaWYgKCEoYXdhaXQgdmlzaWJsZShwcm9kdWN0T2YoY3R4KSwgW2ZdKSkubGVuZ3RoKSB0aHJvdyBuZXcgRXJyb3IoJ1lvdSBjYW5ub3Qgc2VlIHdoZXJlIHRoaXMgcHJvbWlzZSB3YXMgbWFkZS4nKTsKICByZXR1cm4gZjsKfQoKY29uc3QgU1RBVFVTX0xBQkVMOiBSZWNvcmQ8U3RhdHVzLCBzdHJpbmc+ID0geyBvcGVuOiAnUmVvcGVuZWQnLCBzbGlwcGluZzogJ01hcmtlZCBhcyBzbGlwcGluZycsIGtlcHQ6ICdLZXB0JywgZHJvcHBlZDogJ0Ryb3BwZWQnIH07Cgpjb25zdCByZXNvbHZlciA9IG5ldyBSZXNvbHZlcigpOwoKcmVzb2x2ZXIuZGVmaW5lKCdsaXN0JywgYXN5bmMgKHsgY29udGV4dCB9KSA9PiB7CiAgY29uc3QgY3R4ID0gY29udGV4dCBhcyBDdHg7CiAgY29uc3QgcHJvZHVjdCA9IHByb2R1Y3RPZihjdHgpOwogIGNvbnN0IGNvbnRhaW5lciA9IGNvbnRhaW5lck9mKGN0eCk7CiAgLy8gUGFuZWxzIHNpdCBvbiBhbiBpc3N1ZSBvciBwYWdlIHRoZSB2aWV3ZXIgYWxyZWFkeSBoYXMgb3Blbi4KICBjb25zdCBpdGVtcyA9IGNvbnRhaW5lciA/IGF3YWl0IGxpc3RGb3JDb250YWluZXIocHJvZHVjdCwgY29udGFpbmVyKSA6IGF3YWl0IHZpc2libGUocHJvZHVjdCwgYXdhaXQgbGlzdEZvbGxvd1VwcygpKTsKICBjb25zdCBub3cgPSBEYXRlLm5vdygpOwogIHJldHVybiB7IHByb2R1Y3QsIG5vdywgdmlld2VyOiBjdHguYWNjb3VudElkID8/IG51bGwsIHNjb3BlZDogQm9vbGVhbihjb250YWluZXIpLCBpdGVtczogc29ydEZvckxlZGdlcihpdGVtcyksIHN0YXRzOiBzdGF0cyhpdGVtcywgbm93KSB9Owp9KTsKCnJlc29sdmVyLmRlZmluZSgnc2V0U3RhdHVzJywgYXN5bmMgKHsgcGF5bG9hZCwgY29udGV4dCB9KSA9PiB7CiAgY29uc3QgeyBpZCwgc3RhdHVzIH0gPSBwYXlsb2FkIGFzIHsgaWQ6IHN0cmluZzsgc3RhdHVzOiBTdGF0dXMgfTsKICBpZiAoIVsnb3BlbicsICdzbGlwcGluZycsICdrZXB0JywgJ2Ryb3BwZWQnXS5pbmNsdWRlcyhzdGF0dXMpKSB0aHJvdyBuZXcgRXJyb3IoJ1Vua25vd24gc3RhdHVzJyk7CiAgY29uc3QgY3R4ID0gY29udGV4dCBhcyBDdHg7CiAgY29uc3QgZiA9IGF3YWl0IGVkaXRhYmxlKGN0eCwgaWQpOwogIGNvbnN0IHdobyA9IGN0eC5hY2NvdW50SWQgPyAoYXdhaXQgZ2V0VXNlcihwcm9kdWN0T2YoY3R4KSwgY3R4LmFjY291bnRJZCkpLm5hbWUgOiAnc29tZW9uZSc7CiAgY29uc3QgbmV4dCA9IHdpdGhFdmVudChmLCB7IHN0YXR1cyB9LCBgJHtTVEFUVVNfTEFCRUxbc3RhdHVzXX0gYnkgJHt3aG99YCwgRGF0ZS5ub3coKSk7CiAgYXdhaXQgc2F2ZUZvbGxvd1VwKG5leHQpOwogIHJldHVybiBuZXh0Owp9KTsKCnJlc29sdmVyLmRlZmluZSgnc2V0RHVlJywgYXN5bmMgKHsgcGF5bG9hZCwgY29udGV4dCB9KSA9PiB7CiAgY29uc3QgeyBpZCwgZGF5IH0gPSBwYXlsb2FkIGFzIHsgaWQ6IHN0cmluZzsgZGF5OiBzdHJpbmcgfCBudWxsIH07CiAgaWYgKGRheSAhPT0gbnVsbCAmJiAhaXNDYWxlbmRhckRheShkYXkpKSB0aHJvdyBuZXcgRXJyb3IoJ1VzZSBhIHZhbGlkIFlZWVktTU0tREQgZGF0ZScpOwogIGNvbnN0IGN0eCA9IGNvbnRleHQgYXMgQ3R4OwogIGNvbnN0IGYgPSBhd2FpdCBlZGl0YWJsZShjdHgsIGlkKTsKICBjb25zdCB0eiA9IGN0eC5hY2NvdW50SWQgPyAoYXdhaXQgZ2V0VXNlcihwcm9kdWN0T2YoY3R4KSwgY3R4LmFjY291bnRJZCkpLnRpbWVab25lIDogJ1VUQyc7CiAgY29uc3QgZHVlID0gZGF5ID8geyBkYXksIHBocmFzZTogZi5kdWU/LnBocmFzZSA/PyAnc2V0IGJ5IGhhbmQnLCBwcmVjaXNpb246ICdkYXknIGFzIGNvbnN0LCBhdDogZW5kT2ZEYXlJblpvbmUoZGF5LCB0eikgfSA6IG51bGw7CiAgY29uc3QgbmV4dCA9IHdpdGhFdmVudChmLCB7IGR1ZSwgZHVlQnlIYW5kOiB0cnVlLCBudWRnZXM6IFtdIH0sIGRheSA/IGBEdWUgZGF0ZSBzZXQgdG8gJHtkYXl9YCA6ICdEdWUgZGF0ZSBjbGVhcmVkJywgRGF0ZS5ub3coKSk7CiAgYXdhaXQgc2F2ZUZvbGxvd1VwKG5leHQpOwogIHJldHVybiBuZXh0Owp9KTsKCnJlc29sdmVyLmRlZmluZSgnZGlzbWlzcycsIGFzeW5jICh7IHBheWxvYWQsIGNvbnRleHQgfSkgPT4gewogIGNvbnN0IHsgaWQsIGRpc21pc3NlZCB9ID0gcGF5bG9hZCBhcyB7IGlkOiBzdHJpbmc7IGRpc21pc3NlZDogYm9vbGVhbiB9OwogIGNvbnN0IGN0eCA9IGNvbnRleHQgYXMgQ3R4OwogIGNvbnN0IGYgPSBhd2FpdCBlZGl0YWJsZShjdHgsIGlkKTsKICBjb25zdCB3aG8gPSBjdHguYWNjb3VudElkID8gKGF3YWl0IGdldFVzZXIocHJvZHVjdE9mKGN0eCksIGN0eC5hY2NvdW50SWQpKS5uYW1lIDogJ3NvbWVvbmUnOwogIGNvbnN0IG5leHQgPSB3aXRoRXZlbnQoZiwgeyBkaXNtaXNzZWQ6IEJvb2xlYW4oZGlzbWlzc2VkKSB9LCBkaXNtaXNzZWQgPyBgTWFya2VkIG5vdCBhIHByb21pc2UgYnkgJHt3aG99YCA6IGBSZXN0b3JlZCBieSAke3dob31gLCBEYXRlLm5vdygpKTsKICBhd2FpdCBzYXZlRm9sbG93VXAobmV4dCk7CiAgcmV0dXJuIG5leHQ7Cn0pOwoKLyoqIFJlYWRzIHJlY2VudCBjb21tZW50cyBhbmQgcGFnZXMgdGhlIHZpZXdlciBjYW4gc2VlIGFuZCByZWNvcmRzIHRoZSBwcm9taXNlcyBpbiB0aGVtLiAqLwpyZXNvbHZlci5kZWZpbmUoJ3NjYW4nLCBhc3luYyAoeyBjb250ZXh0IH0pID0+IHsKICBjb25zdCBjdHggPSBjb250ZXh0IGFzIEN0eDsKICBjb25zdCBub3cgPSBEYXRlLm5vdygpOwogIGxldCBzY2FubmVkID0gMDsKICBsZXQgZm91bmQgPSAwOwogIGxldCBwYXJ0aWFsID0gZmFsc2U7CiAgY29uc3QgZGVhZGxpbmUgPSBub3cgKyAyMF8wMDA7CiAgY29uc3Qgc2NhbkRheXMgPSAzMDsKICBjb25zdCBzaW5jZSA9IG5vdyAtIHNjYW5EYXlzICogMjQgKiA2MCAqIDYwICogMV8wMDA7CiAgY29uc3QgdGltZWRPdXQgPSAoKSA9PiB7CiAgICBpZiAoRGF0ZS5ub3coKSA8PSBkZWFkbGluZSkgcmV0dXJuIGZhbHNlOwogICAgcGFydGlhbCA9IHRydWU7CiAgICByZXR1cm4gdHJ1ZTsKICB9OwogIGNvbnN0IGluU2NhbldpbmRvdyA9IChzdGFtcDogc3RyaW5nIHwgbnVtYmVyIHwgdW5kZWZpbmVkKSA9PiB7CiAgICBjb25zdCB0aW1lID0gdHlwZW9mIHN0YW1wID09PSAnbnVtYmVyJyA/IHN0YW1wIDogRGF0ZS5wYXJzZShzdGFtcCA/PyAnJyk7CiAgICBpZiAoIU51bWJlci5pc0Zpbml0ZSh0aW1lKSkgcGFydGlhbCA9IHRydWU7CiAgICByZXR1cm4gdGltZSA+PSBzaW5jZSAmJiB0aW1lIDw9IG5vdzsKICB9OwogIGNvbnN0IHJlY29yZCA9IGFzeW5jIChpdGVtOiBQcm9taXNlPHsgZm91bmQ6IG51bWJlciB9PikgPT4gewogICAgdHJ5IHsKICAgICAgZm91bmQgKz0gKGF3YWl0IGl0ZW0pLmZvdW5kOwogICAgICBzY2FubmVkKys7CiAgICB9IGNhdGNoIHsKICAgICAgcGFydGlhbCA9IHRydWU7CiAgICB9CiAgfTsKICBpZiAocHJvZHVjdE9mKGN0eCkgPT09ICdqaXJhJykgewogICAgY29uc3QgaXNzdWVzID0gYXdhaXQgc2VhcmNoUmVjZW50SXNzdWVzKCd1c2VyJywgc2NhbkRheXMsIDQwKTsKICAgIHBhcnRpYWwgfHw9IGlzc3Vlcy5tb3JlOwogICAgZm9yIChjb25zdCBpc3N1ZSBvZiBpc3N1ZXMuaXRlbXMpIHsKICAgICAgaWYgKHRpbWVkT3V0KCkpIGJyZWFrOwogICAgICBjb25zdCBjb21tZW50cyA9IGlzc3VlLmZpZWxkcy5jb21tZW50OwogICAgICBpZiAoIWNvbW1lbnRzKSBjb250aW51ZTsKICAgICAgcGFydGlhbCB8fD0gKGNvbW1lbnRzLnRvdGFsID8/IDApID4gY29tbWVudHMuY29tbWVudHMubGVuZ3RoOwogICAgICBjb25zdCBzb3VyY2VJc3N1ZSA9IHsgaWQ6IGlzc3VlLmlkLCBrZXk6IGlzc3VlLmtleSwgc3VtbWFyeTogaXNzdWUuZmllbGRzLnN1bW1hcnkgfTsKICAgICAgY29uc3QgcmVjZW50OiB7IGNvbW1lbnQ6ICh0eXBlb2YgY29tbWVudHMuY29tbWVudHMpW251bWJlcl07IHRpbWU6IG51bWJlciB9W10gPSBbXTsKICAgICAgY29uc3QgZWRpdGVkOiB7IGNvbW1lbnQ6ICh0eXBlb2YgY29tbWVudHMuY29tbWVudHMpW251bWJlcl07IHRpbWU6IG51bWJlciB9W10gPSBbXTsKICAgICAgZm9yIChjb25zdCBjIG9mIGNvbW1lbnRzLmNvbW1lbnRzKSB7CiAgICAgICAgaWYgKHRpbWVkT3V0KCkpIGJyZWFrOwogICAgICAgIGNvbnN0IGNyZWF0ZWQgPSBEYXRlLnBhcnNlKGMuY3JlYXRlZCk7CiAgICAgICAgaWYgKGluU2NhbldpbmRvdyhjcmVhdGVkKSkgewogICAgICAgICAgcmVjZW50LnB1c2goeyBjb21tZW50OiBjLCB0aW1lOiBjcmVhdGVkIH0pOwogICAgICAgIH0gZWxzZSB7CiAgICAgICAgICBjb25zdCB0aW1lID0gamlyYUNvbW1lbnRSZXZpc2lvbkF0KGMpOwogICAgICAgICAgaWYgKGluU2NhbldpbmRvdyh0aW1lKSkgZWRpdGVkLnB1c2goeyBjb21tZW50OiBjLCB0aW1lIH0pOwogICAgICAgIH0KICAgICAgfQogICAgICBmb3IgKGNvbnN0IHsgY29tbWVudCB9IG9mIHJlY2VudC5zb3J0KChhLCBiKSA9PiBhLnRpbWUgLSBiLnRpbWUpKSB7CiAgICAgICAgaWYgKHRpbWVkT3V0KCkpIGJyZWFrOwogICAgICAgIGF3YWl0IHJlY29yZChpbmdlc3RKaXJhQ29tbWVudChzb3VyY2VJc3N1ZSwgY29tbWVudCwgbm93LCB0cnVlKSk7CiAgICAgIH0KICAgICAgLy8gUmVnaXN0ZXIgcmVjZW50IHByb21pc2VzIGJlZm9yZSBsZXR0aW5nIG9sZGVyIGNvbW1lbnRzJyBlZGl0cyBzZXR0bGUgdGhlbS4KICAgICAgZm9yIChjb25zdCB7IGNvbW1lbnQgfSBvZiBlZGl0ZWQuc29ydCgoYSwgYikgPT4gYS50aW1lIC0gYi50aW1lKSkgewogICAgICAgIGlmICh0aW1lZE91dCgpKSBicmVhazsKICAgICAgICBhd2FpdCByZWNvcmQoaW5nZXN0SmlyYUNvbW1lbnQoc291cmNlSXNzdWUsIGNvbW1lbnQsIG5vdywgdHJ1ZSwgeyBzZXR0bGVtZW50T25seTogdHJ1ZSB9KSk7CiAgICAgIH0KICAgIH0KICB9IGVsc2UgewogICAgY29uc3QgcGFnZXMgPSBhd2FpdCByZWNlbnRQYWdlcygndXNlcicsIDI1KTsKICAgIHBhcnRpYWwgfHw9IHBhZ2VzLm1vcmU7CiAgICBmb3IgKGNvbnN0IHAgb2YgcGFnZXMuaXRlbXMpIHsKICAgICAgaWYgKHRpbWVkT3V0KCkpIGJyZWFrOwogICAgICBpZiAoaW5TY2FuV2luZG93KHAudmVyc2lvbj8uY3JlYXRlZEF0ID8/IHAuY3JlYXRlZEF0KSkgewogICAgICAgIGF3YWl0IHJlY29yZChpbmdlc3RQYWdlKHAsIG5vdywgdHJ1ZSkpOwogICAgICB9CiAgICAgIC8vIFJlY2VudCBmb290ZXIgY29tbWVudHMgY2FuIGJlbG9uZyB0byBhIHBhZ2Ugd2hvc2Ugb3duIHRleHQgaXMgb2xkZXIuCiAgICAgIGlmICh0aW1lZE91dCgpKSBicmVhazsKICAgICAgY29uc3QgY29tbWVudHMgPSBhd2FpdCBwYWdlQ29tbWVudHMoJ3VzZXInLCBwLmlkKS5jYXRjaCgoKSA9PiAoeyBpdGVtczogW10sIG1vcmU6IHRydWUgfSkpOwogICAgICBwYXJ0aWFsIHx8PSBjb21tZW50cy5tb3JlOwogICAgICBmb3IgKGNvbnN0IGMgb2YgY29tbWVudHMuaXRlbXMpIHsKICAgICAgICBpZiAodGltZWRPdXQoKSkgYnJlYWs7CiAgICAgICAgaWYgKCFpblNjYW5XaW5kb3coYy52ZXJzaW9uPy5jcmVhdGVkQXQpKSBjb250aW51ZTsKICAgICAgICBhd2FpdCByZWNvcmQoaW5nZXN0UGFnZUNvbW1lbnQoYywgbm93LCBwLCB0cnVlKSk7CiAgICAgIH0KICAgIH0KICB9CiAgcmV0dXJuIHsgc2Nhbm5lZCwgZm91bmQsIHBhcnRpYWwgfTsKfSk7CgpleHBvcnQgY29uc3QgaGFuZGxlciA9IHJlc29sdmVyLmdldERlZmluaXRpb25zKCk7Cg==
+import Resolver from '@forge/resolver';
+import { sortForLedger, stats, withEvent, type FollowUp, type Status } from './core/ledger';
+import { endOfDayInZone, isCalendarDay } from './core/dates';
+import { recentPages, pageComments, searchRecentIssues, visibleIssueIds, visiblePageIds, getUser, type Product } from './site';
+import { ingestJiraComment, ingestPage, ingestPageComment, jiraCommentRevisionAt } from './sources';
+import { getFollowUp, listFollowUps, listForContainer, saveFollowUp } from './store';
+
+interface Ctx {
+  accountId?: string;
+  moduleKey?: string;
+  extension?: { type?: string; issue?: { id?: string | number }; content?: { id?: string | number } };
+}
+
+const productOf = (ctx: Ctx): Product => (ctx.moduleKey?.startsWith('confluence') ? 'confluence' : 'jira');
+const containerOf = (ctx: Ctx): string | null => {
+  const id = ctx.extension?.issue?.id ?? ctx.extension?.content?.id;
+  return id === undefined ? null : String(id);
+};
+
+async function visible(product: Product, items: FollowUp[]): Promise<FollowUp[]> {
+  const scoped = items.filter((f) => f.source.product === product);
+  const ids = [...new Set(scoped.map((f) => f.source.containerId))];
+  if (!ids.length) return [];
+  const ok = product === 'jira' ? await visibleIssueIds(ids) : await visiblePageIds(ids);
+  return scoped.filter((f) => ok.has(f.source.containerId));
+}
+
+async function editable(ctx: Ctx, id: string): Promise<FollowUp> {
+  const f = await getFollowUp(id);
+  if (!f) throw new Error('This follow-up no longer exists.');
+  if (!(await visible(productOf(ctx), [f])).length) throw new Error('You cannot see where this promise was made.');
+  return f;
+}
+
+const STATUS_LABEL: Record<Status, string> = { open: 'Reopened', slipping: 'Marked as slipping', kept: 'Kept', dropped: 'Dropped' };
+
+const resolver = new Resolver();
+
+resolver.define('list', async ({ context }) => {
+  const ctx = context as Ctx;
+  const product = productOf(ctx);
+  const container = containerOf(ctx);
+  // Panels sit on an issue or page the viewer already has open.
+  const items = container ? await listForContainer(product, container) : await visible(product, await listFollowUps());
+  const now = Date.now();
+  return { product, now, viewer: ctx.accountId ?? null, scoped: Boolean(container), items: sortForLedger(items), stats: stats(items, now) };
+});
+
+resolver.define('setStatus', async ({ payload, context }) => {
+  const { id, status } = payload as { id: string; status: Status };
+  if (!['open', 'slipping', 'kept', 'dropped'].includes(status)) throw new Error('Unknown status');
+  const ctx = context as Ctx;
+  const f = await editable(ctx, id);
+  const who = ctx.accountId ? (await getUser(productOf(ctx), ctx.accountId)).name : 'someone';
+  const next = withEvent(f, { status }, `${STATUS_LABEL[status]} by ${who}`, Date.now());
+  await saveFollowUp(next);
+  return next;
+});
+
+resolver.define('setDue', async ({ payload, context }) => {
+  const { id, day } = payload as { id: string; day: string | null };
+  if (day !== null && !isCalendarDay(day)) throw new Error('Use a valid YYYY-MM-DD date');
+  const ctx = context as Ctx;
+  const f = await editable(ctx, id);
+  const tz = ctx.accountId ? (await getUser(productOf(ctx), ctx.accountId)).timeZone : 'UTC';
+  const due = day ? { day, phrase: f.due?.phrase ?? 'set by hand', precision: 'day' as const, at: endOfDayInZone(day, tz) } : null;
+  const next = withEvent(f, { due, dueByHand: true, nudges: [] }, day ? `Due date set to ${day}` : 'Due date cleared', Date.now());
+  await saveFollowUp(next);
+  return next;
+});
+
+resolver.define('dismiss', async ({ payload, context }) => {
+  const { id, dismissed } = payload as { id: string; dismissed: boolean };
+  const ctx = context as Ctx;
+  const f = await editable(ctx, id);
+  const who = ctx.accountId ? (await getUser(productOf(ctx), ctx.accountId)).name : 'someone';
+  const next = withEvent(f, { dismissed: Boolean(dismissed) }, dismissed ? `Marked not a promise by ${who}` : `Restored by ${who}`, Date.now());
+  await saveFollowUp(next);
+  return next;
+});
+
+/** Reads recent comments and pages the viewer can see and records the promises in them. */
+resolver.define('scan', async ({ context }) => {
+  const ctx = context as Ctx;
+  const now = Date.now();
+  let scanned = 0;
+  let found = 0;
+  let partial = false;
+  const deadline = now + 20_000;
+  const scanDays = 30;
+  const since = now - scanDays * 24 * 60 * 60 * 1_000;
+  const timedOut = () => {
+    if (Date.now() <= deadline) return false;
+    partial = true;
+    return true;
+  };
+  const inScanWindow = (stamp: string | number | undefined) => {
+    const time = typeof stamp === 'number' ? stamp : Date.parse(stamp ?? '');
+    if (!Number.isFinite(time)) partial = true;
+    return time >= since && time <= now;
+  };
+  const record = async (item: Promise<{ found: number }>) => {
+    try {
+      found += (await item).found;
+      scanned++;
+    } catch {
+      partial = true;
+    }
+  };
+  if (productOf(ctx) === 'jira') {
+    const issues = await searchRecentIssues('user', scanDays, 40);
+    partial ||= issues.more;
+    for (const issue of issues.items) {
+      if (timedOut()) break;
+      const comments = issue.fields.comment;
+      if (!comments) continue;
+      partial ||= (comments.total ?? 0) > comments.comments.length;
+      const sourceIssue = { id: issue.id, key: issue.key, summary: issue.fields.summary };
+      const recent: { comment: (typeof comments.comments)[number]; time: number }[] = [];
+      const edited: { comment: (typeof comments.comments)[number]; time: number }[] = [];
+      for (const c of comments.comments) {
+        if (timedOut()) break;
+        const created = Date.parse(c.created);
+        if (inScanWindow(created)) {
+          recent.push({ comment: c, time: created });
+        } else {
+          const time = jiraCommentRevisionAt(c);
+          if (inScanWindow(time)) edited.push({ comment: c, time });
+        }
+      }
+      for (const { comment } of recent.sort((a, b) => a.time - b.time)) {
+        if (timedOut()) break;
+        await record(ingestJiraComment(sourceIssue, comment, now, true));
+      }
+      // Register recent promises before letting older comments' edits settle them.
+      for (const { comment } of edited.sort((a, b) => a.time - b.time)) {
+        if (timedOut()) break;
+        await record(ingestJiraComment(sourceIssue, comment, now, true, { settlementOnly: true }));
+      }
+    }
+  } else {
+    const pages = await recentPages('user', 25);
+    partial ||= pages.more;
+    for (const p of pages.items) {
+      if (timedOut()) break;
+      if (inScanWindow(p.version?.createdAt ?? p.createdAt)) {
+        await record(ingestPage(p, now, true));
+      }
+      // Recent footer comments can belong to a page whose own text is older.
+      if (timedOut()) break;
+      const comments = await pageComments('user', p.id).catch(() => ({ items: [], more: true }));
+      partial ||= comments.more;
+      for (const c of comments.items) {
+        if (timedOut()) break;
+        if (!inScanWindow(c.version?.createdAt)) continue;
+        await record(ingestPageComment(c, now, p, true));
+      }
+    }
+  }
+  return { scanned, found, partial };
+});
+
+export const handler = resolver.getDefinitions();
