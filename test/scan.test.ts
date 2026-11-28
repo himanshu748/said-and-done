@@ -155,3 +155,22 @@ it('continues reading footer comments when their page cannot be recorded', async
   expect(await scan({ context: { moduleKey: 'confluence-ledger' } })).toEqual({ scanned: 1, found: 1, partial: true });
   expect(ingestPageComment.mock.calls.map((call) => call[0].id)).toEqual(['unavailable', 'visible']);
 });
+
+it('replays Confluence footer comments in time order so a reply sees the earlier promise', async () => {
+  const scan = handlers.scan;
+  if (!scan) throw new Error('Scan resolver was not registered');
+  const now = Date.parse('2026-11-27T12:00:00Z');
+  const clock = vi.spyOn(Date, 'now').mockReturnValue(now);
+  const page = { id: 'page', createdAt: '2026-10-01T12:00:00Z' };
+  const promise = { id: 'promise', version: { createdAt: '2026-11-20T12:00:00Z' } };
+  const reply = { id: 'reply', version: { createdAt: '2026-11-21T12:00:00Z' } };
+  recentPages.mockResolvedValue({ items: [page], more: false });
+  pageComments.mockResolvedValue({ items: [reply, promise], more: false });
+  ingestPageComment.mockClear().mockResolvedValue({ found: 0 });
+  try {
+    expect(await scan({ context: { moduleKey: 'confluence-ledger' } })).toEqual({ scanned: 2, found: 0, partial: false });
+    expect(ingestPageComment.mock.calls.map((call) => call[0])).toEqual([promise, reply]);
+  } finally {
+    clock.mockRestore();
+  }
+});
