@@ -75,6 +75,23 @@ it('checks recently edited older Jira comments only for settlement replies', asy
   }
 });
 
+it('replays Jira comments by creation time so a reply sees the promise it follows', async () => {
+  const scan = handlers.scan;
+  if (!scan) throw new Error('Scan resolver was not registered');
+  const now = Date.parse('2026-11-27T12:00:00Z');
+  const clock = vi.spyOn(Date, 'now').mockReturnValue(now);
+  const promise = { id: 'promise', created: '2026-11-20T12:00:00Z' };
+  const reply = { id: 'reply', created: '2026-11-21T12:00:00Z' };
+  searchRecentIssues.mockResolvedValue({ items: [{ id: '12', key: 'APP-1', fields: { summary: 'Draft', comment: { comments: [reply, promise] } } }], more: false });
+  ingestJiraComment.mockClear().mockResolvedValue({ found: 0 });
+  try {
+    await scan({ context: { moduleKey: 'jira-ledger' } });
+    expect(ingestJiraComment.mock.calls.map((call) => call[1])).toEqual([promise, reply]);
+  } finally {
+    clock.mockRestore();
+  }
+});
+
 it('keeps scanning other pages and reports partial results when comments cannot be read', async () => {
   const recent = new Date(Date.now() - 60_000).toISOString();
   recentPages.mockResolvedValue({ items: [{ id: 'first', createdAt: recent }, { id: 'second', createdAt: recent }], more: false });

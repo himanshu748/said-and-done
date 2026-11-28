@@ -116,15 +116,21 @@ resolver.define('scan', async ({ context }) => {
       if (!comments) continue;
       partial ||= (comments.total ?? 0) > comments.comments.length;
       const sourceIssue = { id: issue.id, key: issue.key, summary: issue.fields.summary };
+      const recent: { comment: (typeof comments.comments)[number]; time: number }[] = [];
       const edited: { comment: (typeof comments.comments)[number]; time: number }[] = [];
       for (const c of comments.comments) {
         if (timedOut()) break;
-        if (inScanWindow(c.created)) {
-          await record(ingestJiraComment(sourceIssue, c, now, true));
+        const created = Date.parse(c.created);
+        if (inScanWindow(created)) {
+          recent.push({ comment: c, time: created });
         } else {
           const time = jiraCommentRevisionAt(c);
           if (inScanWindow(time)) edited.push({ comment: c, time });
         }
+      }
+      for (const { comment } of recent.sort((a, b) => a.time - b.time)) {
+        if (timedOut()) break;
+        await record(ingestJiraComment(sourceIssue, comment, now, true));
       }
       // Register recent promises before letting older comments' edits settle them.
       for (const { comment } of edited.sort((a, b) => a.time - b.time)) {
